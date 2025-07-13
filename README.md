@@ -1,3 +1,6 @@
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md)
+
+
 <p align="center">
 <img src="https://demo-cmolds1.com/projects/hylpers_be/public/logo.png" alt="Easystructor" width="100%" />
 </p>
@@ -85,9 +88,13 @@ routes/
 └── api.php
 ```
 
-## License
-
-MIT © 2025 Muhammad Owais Saleem
 
 
+### License
+This MezPay package is open-source software licensed under the MIT License. See the [LICENSE](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) file for more information.
 
+### Contributions and Feedback
+Contributions, issues, and feedback are welcome! If you encounter any problems or have suggestions for improvements, please feel free to create an issue on  [GitHub](https://github.com/owaissaleemjokhio/easystructor)
+
+
+Thank you for using Easystructor to simplify your full-stack development workflow. We hope this extension speeds up your project scaffolding and helps you write clean, structured code effortlessly. If you have any questions or need support, don’t hesitate to reach out. Happy coding! 💻🚀
