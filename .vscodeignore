@@ -1,0 +1,3 @@
+# Don't exclude logo.png
+!.png
+!logo.png

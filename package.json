@@ -1,0 +1,50 @@
+{
+  "name": "easystructor",
+  "displayName": "EasyStructor",
+  "description": "Generate clean modular code structures (CRUD, services, resources) for Laravel, NestJS, and more.",
+  "version": "0.0.1",
+  "publisher": "Muhammad Owais Saleem",
+  "engines": {
+    "vscode": "^1.50.0"
+  },
+  "icon": "logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/owais-saleem/easystructor.git"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:easystructor.generateModule",
+    "onCommand:easystructor.laravel.generateCrud",
+    "onCommand:easystructor.laravel.revertCrud"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "easystructor.generateModule",
+        "title": "Easystructor: Generate Module"
+      },
+      {
+        "command": "easystructor.laravel.generateCrud",
+        "title": "Easystructor: Laravel - Generate CRUD"
+      },
+      {
+        "command": "easystructor.laravel.revertCrud",
+        "title": "Easystructor: Laravel - Revert CRUD"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.6",
+    "typescript": "^4.0.3",
+    "vscode": "^1.1.37"
+  }
+}
