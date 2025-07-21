@@ -1,13 +1,19 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { writeStubFile, addApiRoute } from '../utils/fileHelpers';
-import { controllerStub, serviceStub } from '../utils/stubs';
+import { controllerStub } from '../stubs/controllerStub';
+import { serviceStub } from '../stubs/serviceStub';
+import { jsonResponseStub } from '../stubs/jsonResponseStub';
+import { mediaTraitStub } from '../stubs/mediaTraitStub';
+import { paginatedCollectionStub } from '../stubs/paginatedCollectionStub';
+import { toStudly } from '../utils/stringUtils';
 
 export async function generateCrud(workspaceRoot: string) {
-    const moduleName = await vscode.window.showInputBox({ prompt: 'Enter Module Name (e.g., Product)' });
-    if (!moduleName) return;
+    const rawInput = await vscode.window.showInputBox({ prompt: 'Enter Module Name (e.g., Product)' });
+    if (!rawInput) return;
 
-    const kebabCase = moduleName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    const kebabCase = rawInput.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    const moduleName = toStudly(rawInput);
 
     const options = await vscode.window.showQuickPick(
         [
@@ -30,14 +36,19 @@ export async function generateCrud(workspaceRoot: string) {
 
     switch (options) {
         case 'Full CRUD (Model, Service, Controller, Request, Resource)':
-            sendArtisan(`make:model ${moduleName} -m`);
+            sendArtisan(`make:model ${moduleName}`);
             sendArtisan(`make:request ${moduleName}Request`);
             sendArtisan(`make:resource ${moduleName}Resource`);
+
+            writeStubFile(path.join(workspaceRoot, `app/Traits/JsonResponse.php`), jsonResponseStub());
+            writeStubFile(path.join(workspaceRoot, `app/Traits/Media.php`), mediaTraitStub());
+            writeStubFile(path.join(workspaceRoot, `app/Http/Resources/PaginatedCollection.php`), paginatedCollectionStub());
+
             writeStubFile(path.join(workspaceRoot, `app/Services/${moduleName}Service.php`), serviceStub(moduleName));
             writeStubFile(path.join(workspaceRoot, `app/Http/Controllers/${moduleName}Controller.php`), controllerStub(moduleName));
             break;
         case 'Only Model':
-            sendArtisan(`make:model ${moduleName} -m`);
+            sendArtisan(`make:model ${moduleName}`);
             break;
         case 'Only Request':
             sendArtisan(`make:request ${moduleName}Request`);

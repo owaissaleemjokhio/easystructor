@@ -13,13 +13,19 @@ exports.generateCrud = void 0;
 const vscode = require("vscode");
 const path = require("path");
 const fileHelpers_1 = require("../utils/fileHelpers");
-const stubs_1 = require("../utils/stubs");
+const controllerStub_1 = require("../stubs/controllerStub");
+const serviceStub_1 = require("../stubs/serviceStub");
+const jsonResponseStub_1 = require("../stubs/jsonResponseStub");
+const mediaTraitStub_1 = require("../stubs/mediaTraitStub");
+const paginatedCollectionStub_1 = require("../stubs/paginatedCollectionStub");
+const stringUtils_1 = require("../utils/stringUtils");
 function generateCrud(workspaceRoot) {
     return __awaiter(this, void 0, void 0, function* () {
-        const moduleName = yield vscode.window.showInputBox({ prompt: 'Enter Module Name (e.g., Product)' });
-        if (!moduleName)
+        const rawInput = yield vscode.window.showInputBox({ prompt: 'Enter Module Name (e.g., Product)' });
+        if (!rawInput)
             return;
-        const kebabCase = moduleName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+        const kebabCase = rawInput.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+        const moduleName = (0, stringUtils_1.toStudly)(rawInput);
         const options = yield vscode.window.showQuickPick([
             'Full CRUD (Model, Service, Controller, Request, Resource)',
             'Only Model',
@@ -36,14 +42,17 @@ function generateCrud(workspaceRoot) {
         const sendArtisan = (cmd) => terminal.sendText(`php artisan ${cmd}`);
         switch (options) {
             case 'Full CRUD (Model, Service, Controller, Request, Resource)':
-                sendArtisan(`make:model ${moduleName} -m`);
+                sendArtisan(`make:model ${moduleName}`);
                 sendArtisan(`make:request ${moduleName}Request`);
                 sendArtisan(`make:resource ${moduleName}Resource`);
-                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Services/${moduleName}Service.php`), (0, stubs_1.serviceStub)(moduleName));
-                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Http/Controllers/${moduleName}Controller.php`), (0, stubs_1.controllerStub)(moduleName));
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Traits/JsonResponse.php`), (0, jsonResponseStub_1.jsonResponseStub)());
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Traits/Media.php`), (0, mediaTraitStub_1.mediaTraitStub)());
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Http/Resources/PaginatedCollection.php`), (0, paginatedCollectionStub_1.paginatedCollectionStub)());
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Services/${moduleName}Service.php`), (0, serviceStub_1.serviceStub)(moduleName));
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Http/Controllers/${moduleName}Controller.php`), (0, controllerStub_1.controllerStub)(moduleName));
                 break;
             case 'Only Model':
-                sendArtisan(`make:model ${moduleName} -m`);
+                sendArtisan(`make:model ${moduleName}`);
                 break;
             case 'Only Request':
                 sendArtisan(`make:request ${moduleName}Request`);
@@ -52,10 +61,10 @@ function generateCrud(workspaceRoot) {
                 sendArtisan(`make:resource ${moduleName}Resource`);
                 break;
             case 'Only Service':
-                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Services/${moduleName}Service.php`), (0, stubs_1.serviceStub)(moduleName));
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Services/${moduleName}Service.php`), (0, serviceStub_1.serviceStub)(moduleName));
                 break;
             case 'Only Controller':
-                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Http/Controllers/${moduleName}Controller.php`), (0, stubs_1.controllerStub)(moduleName));
+                (0, fileHelpers_1.writeStubFile)(path.join(workspaceRoot, `app/Http/Controllers/${moduleName}Controller.php`), (0, controllerStub_1.controllerStub)(moduleName));
                 break;
         }
         if (['Full CRUD (Model, Service, Controller, Request, Resource)', 'Only Controller'].includes(options)) {

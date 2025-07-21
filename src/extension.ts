@@ -9,6 +9,8 @@ export function activate(context: vscode.ExtensionContext) {
     return;
   }
 
+  registerLaravelCommands(context, workspaceRoot);
+
   const mainCmd = vscode.commands.registerCommand('easystructor.generateModule', async () => {
     const framework = await vscode.window.showQuickPick(
       ['Laravel', 'NestJS (coming soon)', 'Django (coming soon)'],
@@ -19,7 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     switch (framework) {
       case 'Laravel':
-        registerLaravelCommands(context, workspaceRoot);
         vscode.commands.executeCommand('easystructor.laravel.generateCrud');
         break;
       default:

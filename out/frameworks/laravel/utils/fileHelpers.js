@@ -4,9 +4,11 @@ exports.removeApiRoute = exports.addApiRoute = exports.getCrudFilePaths = export
 const fs = require("fs");
 const path = require("path");
 function writeStubFile(filePath, content) {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, content, 'utf8');
+    const dir = path.dirname(filePath);
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
+    fs.writeFileSync(filePath, content, 'utf8');
 }
 exports.writeStubFile = writeStubFile;
 function getCrudFilePaths(moduleName) {

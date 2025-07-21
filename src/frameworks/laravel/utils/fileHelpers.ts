@@ -2,9 +2,13 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 export function writeStubFile(filePath: string, content: string) {
-    if (!fs.existsSync(filePath)) {
-        fs.writeFileSync(filePath, content, 'utf8');
+    const dir = path.dirname(filePath);
+
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
     }
+
+    fs.writeFileSync(filePath, content, 'utf8');
 }
 
 export function getCrudFilePaths(moduleName: string): string[] {

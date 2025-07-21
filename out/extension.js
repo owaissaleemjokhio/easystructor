@@ -20,13 +20,13 @@ function activate(context) {
         vscode.window.showErrorMessage('Easystructor: No workspace folder found.');
         return;
     }
+    registerLaravelCommands(context, workspaceRoot);
     const mainCmd = vscode.commands.registerCommand('easystructor.generateModule', () => __awaiter(this, void 0, void 0, function* () {
         const framework = yield vscode.window.showQuickPick(['Laravel', 'NestJS (coming soon)', 'Django (coming soon)'], { placeHolder: 'Select the framework to generate module for' });
         if (!framework)
             return;
         switch (framework) {
             case 'Laravel':
-                registerLaravelCommands(context, workspaceRoot);
                 vscode.commands.executeCommand('easystructor.laravel.generateCrud');
                 break;
             default:
