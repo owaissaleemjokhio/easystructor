@@ -15,7 +15,8 @@ export async function revertCrud(workspaceRoot: string) {
 
     const deleted: string[] = [];
 
-    getCrudFilePaths(moduleName).forEach(relPath => {
+    const filesToDelete = getCrudFilePaths(moduleName, workspaceRoot);
+    filesToDelete.forEach(relPath => {
         const fullPath = path.join(workspaceRoot, relPath);
         if (fs.existsSync(fullPath)) {
             fs.unlinkSync(fullPath);

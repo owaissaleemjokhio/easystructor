@@ -26,7 +26,8 @@ function revertCrud(workspaceRoot) {
         if (confirm !== 'Yes')
             return;
         const deleted = [];
-        (0, fileHelpers_1.getCrudFilePaths)(moduleName).forEach(relPath => {
+        const filesToDelete = (0, fileHelpers_1.getCrudFilePaths)(moduleName, workspaceRoot);
+        filesToDelete.forEach(relPath => {
             const fullPath = path.join(workspaceRoot, relPath);
             if (fs.existsSync(fullPath)) {
                 fs.unlinkSync(fullPath);

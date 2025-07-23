@@ -1,7 +1,24 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.serviceStub = void 0;
-function serviceStub(name) {
+const fieldParser_1 = require("../utils/fieldParser");
+function serviceStub(name, input) {
+    const fields = (0, fieldParser_1.parseFields)(input);
+    const fillable = fields.map(f => `'${f.name}'`).join(', ');
+    const filters = fields
+        .map(field => {
+        const name = field.name;
+        const type = field.type;
+        if (type == 'string' || type == 'text') {
+            return `->when(isset($filters['${name}']), fn($q) => $q->where('${name}', 'like', '%' . $filters['${name}'] . '%'))`;
+        }
+        if (['integer', 'bigint', 'boolean', 'float', 'decimal', 'enum', 'date', 'datetime', 'time'].includes(type)) {
+            return `->when(isset($filters['${name}']), fn($q) => $q->where('${name}', $filters['${name}']))`;
+        }
+        return '';
+    })
+        .filter(Boolean)
+        .join('\n            ');
     return `<?php
 
 namespace App\\Services;
@@ -19,8 +36,7 @@ final class ${name}Service
      * @var array<int, string>
      */
     private array \$attributes = [
-        // Define your model's fillable fields here
-        // 'field1', 'field2'
+        ${fillable}
     ];
 
     /**
@@ -61,11 +77,11 @@ final class ${name}Service
      * @param [type] \$filters
      * @return Builder
      */
-    protected function applyFilters(\$query, array \$filters): Builder
+     protected function applyFilters(\$query, array \$filters): Builder
     {
-        // Example: update to match your model fields
-        return \$query
-            ->when(isset(\$filters['name']), fn(\$q) => \$q->where('name', 'like', '%' . \$filters['name'] . '%'));
+        return \$query 
+        
+        ${filters};
     }
 
     /**

@@ -82,7 +82,7 @@ class ${name}Controller extends Controller
         );
     }
 
-       /**
+    /**
      * Update the specified ${name}.
      *
      * @param ${name}Request $request

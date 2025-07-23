@@ -1,97 +1,148 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md)
 
 
-<p align="center">
-<img src="https://demo-cmolds1.com/projects/hylpers_be/public/logo.png" alt="Easystructor" width="100%" />
-</p>
+# 🛠️ Easystructor — Laravel & Full-Stack Code Generator for VS Code
 
-# Easystructor
-
-**Easystructor** is a Visual Studio Code extension that helps you generate full-stack boilerplate code quickly using predefined project structures and custom logic. Currently supports Laravel (Service/Repository/DDD structure), and is designed to support more frameworks like NestJS, Django, and Spring soon.
-
-## 🌟 Features
-
-- 🔧 Generate full CRUD modules for Laravel:
-  - Model
-  - Controller (with Service injection)
-  - Form Request
-  - Resource
-  - Service class
-- 🔁 Revert/Delete a complete CRUD module with route cleanup
-- ⚙️ Auto-register routes (e.g., `Route::apiResource(...)`)
-- 🧠 Intelligent stubs and file generation using custom artisan and logic
-- 📦 Clean modular code structure (controllers, services, models separated)
-- ⚡ CLI-based and UI-based prompts
-- 🔌 Future-ready for multi-framework support (NestJS, Django, etc.)
+**Easystructor** is a Visual Studio Code extension that automates the generation of clean, scalable boilerplate code for modern backend frameworks. Currently focused on Laravel (Service/Repository/DDD structure), support for NestJS, Django, and Spring is coming soon.
 
 ---
 
-## Usage
+## ✨ Features
 
-1. Open a Laravel project in VS Code.
-2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
-3. Run: `Easystructor: Generate CRUD Module`
-4. Provide module name (e.g. `Product`)
-5. Select generation options.
+### ✅ Laravel Support (Advanced)
+- 🔧 Generate full CRUD modules:
+  - 🧩 Model (with `$fillable`, `$attributes`)
+  - 🛡️ Form Request (with accurate validation)
+  - ⚙️ Controller (uses Service pattern)
+  - 📦 Service class (with filters, pagination, find/store/update/delete)
+  - 🎯 Resource class
+- ⚙️ Auto-register `Route::apiResource(...)`
+- 🧹 Auto-revert/delete a complete module
+- 🔁 Centralized JSON Response and Exception-friendly structure
+- 🧠 Intelligent field parser:
+  - Supports syntax like:  
+    `name:string, is_active:boolean:nullable:default(true), type:enum:allowed(admin,user):default(user)`
+  - Handles nullable, default, enum, and type-specific validation/migration
+- 🔍 Service filters based on field types (text vs exact match)
+- 📦 Artisan-based dynamic stub generation and cleanup
+- 📦 Clean modular folder structure
+- 🧪 Field Types Supported:
+  - `string`, `text`, `integer`, `bigint`, `float`, `decimal`
+  - `boolean`, `enum`, `date`, `datetime`, `time`, `json`
 
-To revert a module:
+---
 
-- Run: `Easystructor: Revert CRUD Module`
+## 📦 Example Input
 
-## Output Example
-
+```text
+name:string,
+email:string:nullable,
+price:decimal:default(0.00),
+is_active:boolean:default(true),
+role:enum:allowed(admin,user):default(user),
+registered_at:datetime:nullable
 ```
-app/
-├── Models/Product.php
-├── Http/Controllers/ProductController.php
-├── Http/Requests/ProductRequest.php
-├── Http/Resources/ProductResource.php
-├── Services/ProductService.php
 
-routes/
-└── api.php
+### 🧾 Output: Migration
+
+```php
+$table->string('name');
+$table->string('email')->nullable();
+$table->decimal('price', 10, 2)->default(0.00);
+$table->boolean('is_active')->default(true);
+$table->enum('role', ['admin', 'user'])->default('user');
+$table->dateTime('registered_at')->nullable();
 ```
 
+### 🧾 Output: Validation Rules
+
+```php
+'name' => 'required|string',
+'email' => 'nullable|string',
+'price' => 'required|numeric',
+'is_active' => 'required|boolean',
+'role' => 'required|in:admin,user',
+'registered_at' => 'nullable|date',
+```
+
+### 🧾 Output: Service Filters
+
+```php
+->when(isset($filters['name']), fn($q) => $q->where('name', 'like', '%' . $filters['name'] . '%'))
+->when(isset($filters['price']), fn($q) => $q->where('price', $filters['price']))
+->when(isset($filters['is_active']), fn($q) => $q->where('is_active', $filters['is_active']))
+```
+
+---
 
 ## 🚀 Getting Started
 
-### 1. Install
+### 1. Install Extension
 
-Install the extension via VS Code Marketplace (or manually via `.vsix`).
+Install from the VS Code Marketplace or via `.vsix`.
 
 ```bash
-ext install your-publisher-name.easystructor
+ext install easystructor.easystructor
 ```
 
-## Usage
+---
+
+## 💻 Usage
+
+### 🛠️ Generate CRUD Module
 
 1. Open a Laravel project in VS Code.
-2. Open the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
-3. Run: `Easystructor: Generate CRUD Module`
-4. Provide module name (e.g. `Product`)
-5. Select generation options.
+2. Open the Command Palette:  
+   `Ctrl + Shift + P` / `Cmd + Shift + P`
+3. Run:  
+   `Easystructor: Generate CRUD Module`
+4. Enter module name (e.g. `Product`)
+5. Enter fields in this format:  
+   `name:string, price:decimal:default(0.00), status:boolean:default(true)`
 
-To revert a module:
+---
 
-- Run: `Easystructor: Revert CRUD Module`
+### 🔁 Revert a Module
 
-## Output Example
+To delete the full CRUD module (Model, Controller, etc.):  
+Run: `Easystructor: Revert CRUD Module`
+
+---
+
+## 📁 Output Structure
 
 ```
 app/
 ├── Models/Product.php
-├── Http/Controllers/ProductController.php
-├── Http/Requests/ProductRequest.php
-├── Http/Resources/ProductResource.php
+├── Http/
+│   ├── Controllers/ProductController.php
+│   ├── Requests/ProductRequest.php
+│   ├── Resources/ProductResource.php
 ├── Services/ProductService.php
 routes/
-└── api.php
+└── api.php (auto-updated)
 ```
 
+---
 
+## 🛣️ Roadmap
+
+- [x] Laravel CRUD generator
+- [x] Intelligent field parser (with enum/default/nullable)
+- [x] Full modular architecture
+- [x] Auto-revert CRUD
+- [x] Auto-filter generation
+- [x] Command palette support
+- [x] JSON response handling
+- [ ] NestJS & Django support (in progress)
+- [ ] UI-based form input for fields
+- [ ] In-editor preview before generation
+- [ ] Artisan command customization via config
+
+---
 
 ### License
-This MezPay package is open-source software licensed under the MIT License. See the [LICENSE](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) file for more information.
+This Easystructor package is open-source software licensed under the MIT License. See the [LICENSE](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) file for more information.
 
 ### Contributions and Feedback
 Contributions, issues, and feedback are welcome! If you encounter any problems or have suggestions for improvements, please feel free to create an issue on  [GitHub](https://github.com/owaissaleemjokhio/easystructor)

@@ -3,22 +3,48 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.removeApiRoute = exports.addApiRoute = exports.getCrudFilePaths = exports.writeStubFile = void 0;
 const fs = require("fs");
 const path = require("path");
+const pluralize = require("pluralize");
+/**
+ * Safely writes a file stub. Ensures the directory exists before writing.
+ *
+ * @param filePath Absolute file path to write.
+ * @param content  File content to write.
+ */
 function writeStubFile(filePath, content) {
-    const dir = path.dirname(filePath);
-    if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir, { recursive: true });
+    try {
+        const dir = path.dirname(filePath);
+        // Create the directory recursively if it doesn't exist
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+        }
+        // Write content to the file
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`[✔] Stub written: ${filePath}`);
     }
-    fs.writeFileSync(filePath, content, 'utf8');
+    catch (error) {
+        console.error(`[✘] Failed to write stub file: ${filePath}`, error);
+    }
 }
 exports.writeStubFile = writeStubFile;
-function getCrudFilePaths(moduleName) {
-    return [
+function getCrudFilePaths(moduleName, workspaceRoot) {
+    const snakeName = moduleName.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+    const snake = pluralize(snakeName);
+    const paths = [
         `app/Models/${moduleName}.php`,
         `app/Http/Controllers/${moduleName}Controller.php`,
         `app/Http/Requests/${moduleName}Request.php`,
-        `app/Http/Resources/${moduleName}Resource.php`,
         `app/Services/${moduleName}Service.php`,
+        `app/Http/Resources/${moduleName}Resource.php`,
     ];
+    const migrationDir = path.join(workspaceRoot, 'database/migrations');
+    if (fs.existsSync(migrationDir)) {
+        const migrationFiles = fs.readdirSync(migrationDir);
+        const migrationMatch = migrationFiles.find(file => file.endsWith(`create_${snake}_table.php`));
+        if (migrationMatch) {
+            paths.push(`database/migrations/${migrationMatch}`);
+        }
+    }
+    return paths;
 }
 exports.getCrudFilePaths = getCrudFilePaths;
 function addApiRoute(root, routeName, controllerName) {
