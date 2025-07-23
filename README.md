@@ -1,7 +1,12 @@
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/Easystructor.easystructor?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=Easystructor.easystructor)
 
 
-# 🛠️ Easystructor — Laravel & Full-Stack Code Generator for VS Code
+<h1 align="center">Easystructor — Full-Stack Code Generator</h1>
+
+<div align="center">
+    <img src="./assets/image.png">
+</div>
+
 
 **Easystructor** is a Visual Studio Code extension that automates the generation of clean, scalable boilerplate code for modern backend frameworks. Currently focused on Laravel (Service/Repository/DDD structure), support for NestJS, Django, and Spring is coming soon.
 
@@ -77,12 +82,12 @@ $table->dateTime('registered_at')->nullable();
 
 ## 🚀 Getting Started
 
-### 1. Install Extension
+## 📦 Installation
 
-Install from the VS Code Marketplace or via `.vsix`.
+Install **Easystructor** from the [Visual Studio Code Marketplace](https://marketplace.visualstudio.com/items?itemName=Easystructor.easystructor):
 
 ```bash
-ext install easystructor.easystructor
+code --install-extension Easystructor.easystructor
 ```
 
 ---

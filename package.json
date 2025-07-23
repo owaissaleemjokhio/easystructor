@@ -2,7 +2,7 @@
   "name": "easystructor",
   "displayName": "EasyStructor",
   "description": "Generate clean modular code structures (CRUD, services, resources) for Laravel, NestJS, and more.",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "publisher": "easystructor",
   "engines": {
     "vscode": "^1.50.0"
@@ -13,7 +13,14 @@
     "url": "https://github.com/owaissaleemjokhio/easystructor"
   },
   "categories": [
-    "Other"
+    "Laravel",
+    "PHP",
+    "JavaScript",
+    "TypeScript",
+    "Other",
+    "Snippets",
+    "Code Generators",
+    "Frameworks"
   ],
   "activationEvents": [
     "onCommand:easystructor.generateModule",
