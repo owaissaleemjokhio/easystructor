@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Easystructor Generator</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: #2563eb;
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+        }
+
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-950 text-white">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-3xl font-bold text-black">🛠️ Easystructor Generator</h1>
+            <div class="flex items-center gap-2">
+                <span class="text-sm">Dark Mode</span>
+                <label class="switch">
+                    <input id="darkToggle" type="checkbox" />
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Card Container -->
+        <div class="bg-gray-900 shadow-xl rounded-xl p-6 space-y-6 border border-gray-800">
+
+            <!-- Model Name -->
+            <div>
+                <label class="block text-sm font-semibold mb-2">Model Name</label>
+                <input id="modelName" class="w-full px-4 py-3 rounded-md bg-gray-800 border border-gray-700 text-white"
+                    placeholder="e.g., Product" />
+            </div>
+
+            <!-- Fields -->
+            <div>
+                <label class="block text-sm font-semibold mb-2">Fields</label>
+                <div id="fieldsContainer" class="space-y-3"></div>
+                <button onclick="addFieldRow()"
+                    class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-sm rounded-md">+ Add Field</button>
+            </div>
+
+            <!-- Template Buttons -->
+            <div class="flex gap-4">
+                <button onclick="saveTemplate()"
+                    class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-black font-semibold">Save
+                    Template</button>
+                <button onclick="loadTemplate()"
+                    class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded text-white">Load Template</button>
+            </div>
+
+            <!-- Laravel Code Preview -->
+            <div>
+                <label class="block text-sm font-semibold mb-2">Live Laravel Code</label>
+                <pre id="codePreview"
+                    class="text-green-400 bg-gray-800 p-4 rounded overflow-auto text-sm max-h-72"></pre>
+            </div>
+
+            <!-- Final Actions -->
+            <div class="flex justify-end gap-4 pt-4 border-t border-gray-700">
+                <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded" onclick="closeModal()">Cancel</button>
+                <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" onclick="submitData()">Generate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script -->
+    <script>
+        const vscode = window.acquireVsCodeApi ? acquireVsCodeApi() : null;
+        const fieldTypes = ['string', 'text', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'enum'];
+
+        function closeModal() {
+            if (vscode) vscode.postMessage({ command: 'close' });
+        }
+
+        function addFieldRow(field = {}) {
+            const container = document.getElementById('fieldsContainer');
+            const div = document.createElement('div');
+            div.className = "field-row flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-md border border-gray-700";
+
+            div.innerHTML = `
+        <input placeholder="name" class="field-name px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-36" value="${field.name || ''}" />
+        <select class="field-type px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32">
+          ${fieldTypes.map(t => `<option value="${t}" ${t === field.type ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <input placeholder="default" class="field-default px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32" value="${field.default || ''}" />
+        <input placeholder="enum1,enum2" class="field-enum-values px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-48 ${field.type === 'enum' ? '' : 'hidden'}" value="${field.enum?.join(',') || ''}" />
+        <label class="text-sm"><input type="checkbox" class="field-nullable mr-1" ${field.nullable ? 'checked' : ''} /> Nullable</label>
+        <button onclick="this.parentElement.remove(); updateCodePreview();" class="text-red-400 text-xl font-bold">×</button>
+      `;
+
+            const typeSelect = div.querySelector('.field-type');
+            const enumInput = div.querySelector('.field-enum-values');
+            typeSelect.addEventListener('change', () => {
+                if (typeSelect.value === 'enum') enumInput.classList.remove('hidden');
+                else enumInput.classList.add('hidden');
+                updateCodePreview();
+            });
+
+            div.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updateCodePreview));
+            container.appendChild(div);
+            updateCodePreview();
+        }
+
+        function updateCodePreview() {
+            const model = document.getElementById('modelName').value.trim();
+            const rows = document.querySelectorAll('.field-row');
+            let code = `Schema::create('${model.toLowerCase()}s', function (Blueprint $table) {\n  $table->id();\n`;
+
+            rows.forEach(row => {
+                const name = row.querySelector('.field-name').value.trim();
+                const type = row.querySelector('.field-type').value;
+                const nullable = row.querySelector('.field-nullable').checked;
+                const defaultVal = row.querySelector('.field-default').value;
+                const enumInput = row.querySelector('.field-enum-values');
+                const enums = (type === 'enum' && enumInput) ? enumInput.value.split(',').map(e => `'${e.trim()}'`).join(', ') : null;
+
+                if (!name) return;
+
+                code += `  $table->${type === 'enum' ? `enum('${name}', [${enums}])` : `${type}('${name}')`}`;
+                if (nullable) code += '->nullable()';
+                if (defaultVal) code += `->default('${defaultVal}')`;
+                code += ';\n';
+            });
+
+            code += '  $table->timestamps();\n});';
+            document.getElementById('codePreview').innerText = code;
+        }
+
+        function submitData() {
+            const model = document.getElementById('modelName').value.trim();
+            const fields = [];
+
+            document.querySelectorAll('.field-row').forEach(row => {
+                const name = row.querySelector('.field-name').value.trim();
+                const type = row.querySelector('.field-type').value;
+                const nullable = row.querySelector('.field-nullable').checked;
+                const defaultVal = row.querySelector('.field-default').value.trim();
+                const enumInput = row.querySelector('.field-enum-values');
+                const enums = enumInput && !enumInput.classList.contains('hidden') ? enumInput.value.split(',').map(e => e.trim()) : null;
+
+                if (name) fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
+            });
+
+            const payload = { model, fields };
+            console.log('Submitting:', payload);
+            if (vscode) vscode.postMessage({ command: 'generate', payload });
+        }
+
+        function saveTemplate() {
+            const model = document.getElementById('modelName').value;
+            const fields = [];
+
+            document.querySelectorAll('.field-row').forEach(row => {
+                fields.push({
+                    name: row.querySelector('.field-name').value,
+                    type: row.querySelector('.field-type').value,
+                    nullable: row.querySelector('.field-nullable').checked,
+                    default: row.querySelector('.field-default').value,
+                    enum: row.querySelector('.field-enum-values').value.split(',').map(e => e.trim())
+                });
+            });
+
+            localStorage.setItem('easystructor_template', JSON.stringify({ model, fields }));
+            alert('Template saved!');
+        }
+
+        function loadTemplate() {
+            const raw = localStorage.getItem('easystructor_template');
+            if (!raw) return;
+            const { model, fields } = JSON.parse(raw);
+            document.getElementById('modelName').value = model;
+            document.getElementById('fieldsContainer').innerHTML = '';
+            fields.forEach(field => addFieldRow(field));
+        }
+
+        document.getElementById('darkToggle').addEventListener('change', e => {
+            document.documentElement.classList.toggle('dark', e.target.checked);
+        });
+
+        new Sortable(fieldsContainer, {
+            animation: 150,
+            onEnd: updateCodePreview
+        });
+
+        window.onload = () => addFieldRow();
+    </script>
+</body>
+
+</html>

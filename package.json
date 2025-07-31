@@ -5,7 +5,7 @@
   "version": "1.0.1",
   "publisher": "easystructor",
   "engines": {
-    "vscode": "^1.50.0"
+    "vscode": "^1.102.0"
   },
   "icon": "logo.png",
   "repository": {
@@ -23,6 +23,7 @@
     "Frameworks"
   ],
   "activationEvents": [
+    "onCommand:easystructor.openModal",
     "onCommand:easystructor.generateModule",
     "onCommand:easystructor.laravel.generateCrud",
     "onCommand:easystructor.laravel.revertCrud"
@@ -30,6 +31,10 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "easystructor.openModal",
+        "title": "Easystructor: Open Modal"
+      },
       {
         "command": "easystructor.generateModule",
         "title": "Easystructor: Generate Module"
@@ -45,15 +50,17 @@
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run compile-less",
     "compile": "tsc -p ./",
+    "compile-less": "lessc src/webview/modal.less src/webview/modal.css",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-    "@types/node": "^14.14.6",
+    "@types/node": "^20.12.12",
     "@types/pluralize": "^0.0.33",
-    "typescript": "^4.0.3",
-    "vscode": "^1.1.37"
+    "@types/vscode": "^1.102.0",
+    "less": "^4.2.0",
+    "typescript": "^5.4.5"
   },
   "dependencies": {
     "pluralize": "^8.0.0"

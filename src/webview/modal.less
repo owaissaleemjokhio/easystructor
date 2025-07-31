@@ -1,0 +1,306 @@
+// Variables
+@bg: #ffffff;
+@bg-dark: #1f2937;
+@primary-color: #4f46e5; // Indigo
+@secondary-color: #94969b; // Gray
+@accent-color: #10b981; // Emerald
+@gradient-start: #a5b4fc; // Light indigo
+@gradient-end: #8681e7; // Dark indigo
+@shadow-base: 0 8px 24px rgba(0, 0, 0, 0.15);
+@border-radius: 12px;
+@animation-duration: 0.4s;
+@font-family: 'Poppins', sans-serif;
+
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: @bg;
+    color: #111827;
+
+    &.dark {
+        background: @bg-dark;
+        color: #f9fafb;
+    }
+}
+
+.btn {
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+
+    &.green {
+        background: #10b981;
+        color: white;
+    }
+
+    &.yellow {
+        background: #facc15;
+        color: black;
+    }
+
+    &.indigo {
+        background: #6366f1;
+        color: white;
+    }
+
+    &.blue {
+        background: #3b82f6;
+        color: white;
+    }
+
+    &.gray {
+        background: #6b7280;
+        color: white;
+    }
+}
+
+// Mixins
+.transition(@property: all, @duration: 0.3s, @ease: ease) {
+    transition: @property @duration @ease;
+}
+
+.button-styles(@bg-color, @hover-color) {
+    background: @bg-color;
+    color: white;
+    padding: 10px 20px;
+    border-radius: @border-radius / 2;
+    border: none;
+    cursor: pointer;
+    font-family: @font-family;
+    font-weight: 600;
+    .transition(transform, 0.2s, ease-in-out);
+
+    &:hover {
+        background: @hover-color;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        animation: pulse 1.5s infinite;
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px fade(@bg-color, 30%);
+    }
+}
+
+.shadow-variant(@level) when (@level =1) {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-variant(@level) when (@level =2) {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.shadow-variant(@level) when (@level =3) {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+// Loop for spacing utilities
+.spacing-classes(@counter) when (@counter > 0) {
+    .m-@{counter} {
+        margin: (@counter * 4px);
+    }
+
+    .p-@{counter} {
+        padding: (@counter * 4px);
+    }
+
+    .spacing-classes((@counter - 1));
+}
+
+.spacing-classes(5);
+
+// Main styles
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px); // Glassmorphism
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn @animation-duration ease-in;
+    z-index: 1000;
+
+    .modal-content {
+        background: linear-gradient(135deg, @gradient-start, @gradient-end);
+        border-radius: @border-radius;
+        width: 90%;
+        max-width: 600px;
+        .shadow-variant(3);
+        padding: 24px;
+        font-family: @font-family;
+        animation: bounceIn @animation-duration ease-out;
+        position: relative;
+        overflow: hidden;
+
+        // Glassmorphism inner layer
+        &::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            z-index: -1;
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+
+        .title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: white;
+            position: relative;
+            padding-bottom: 8px;
+
+            // Gradient underline
+            &::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 50%;
+                height: 3px;
+                background: linear-gradient(to right, @accent-color, transparent);
+            }
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: white;
+            .transition(color);
+
+            &:hover {
+                color: @accent-color;
+                transform: rotate(90deg);
+            }
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 0 3px fade(@accent-color, 30%);
+            }
+        }
+    }
+
+    .modal-body {
+        .p-3;
+        color: white;
+
+        p {
+            line-height: 1.6;
+            opacity: 0.9;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 4px solid @accent-color;
+            border-top: 4px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+    }
+
+    .modal-footer {
+        text-align: right;
+        .p-2;
+
+        .btn-primary {
+            .button-styles(@primary-color, darken(@primary-color, 10%));
+        }
+
+        .btn-secondary {
+            .button-styles(@secondary-color, darken(@secondary-color, 10%));
+            margin-right: 10px;
+        }
+    }
+}
+
+// Animations
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    60% {
+        transform: scale(1.05);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+// Responsive design
+@media (max-width: 480px) {
+    .modal-content {
+        width: 95%;
+        padding: 16px;
+        .shadow-variant(2);
+    }
+
+    .title {
+        font-size: 1.5rem;
+    }
+
+    .close-btn {
+        font-size: 1.25rem;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+}
