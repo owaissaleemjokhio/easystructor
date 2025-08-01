@@ -32,16 +32,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "easystructor.openModal",
-        "title": "Easystructor: Open Modal"
-      },
-      {
         "command": "easystructor.generateModule",
         "title": "Easystructor: Generate Module"
-      },
-      {
-        "command": "easystructor.laravel.generateCrud",
-        "title": "Easystructor: Laravel - Generate CRUD"
       },
       {
         "command": "easystructor.laravel.revertCrud",

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { generateCrud as generateLaravelCrud } from './frameworks/laravel/commands/generateCrud';
+import { generateCrud as generateLaravelCrud, generateLaravelCrudFromUI } from './frameworks/laravel/commands/generateCrud';
 import { revertCrud as revertLaravelCrud } from './frameworks/laravel/commands/revertCrud';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -12,7 +12,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   registerLaravelCommands(context, workspaceRoot);
-  registerUIModal(context);
+  registerUIModal(context, workspaceRoot);
 
   const mainCmd = vscode.commands.registerCommand('easystructor.generateModule', async () => {
     const framework = await vscode.window.showQuickPick(
@@ -24,7 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     switch (framework) {
       case 'Laravel':
-        vscode.commands.executeCommand('easystructor.laravel.generateCrud');
+        // vscode.commands.executeCommand('easystructor.laravel.generateCrud');
+        vscode.commands.executeCommand('easystructor.openModal');
         break;
       default:
         vscode.window.showInformationMessage(`${framework} support is coming soon!`);
@@ -49,7 +50,7 @@ function registerLaravelCommands(context: vscode.ExtensionContext, root: string)
 }
 
 
-function registerUIModal(context: vscode.ExtensionContext) {
+function registerUIModal(context: vscode.ExtensionContext, root: string) {
   let disposable = vscode.commands.registerCommand('easystructor.openModal', () => {
     const panel = vscode.window.createWebviewPanel(
       'easystructorModal',
@@ -77,6 +78,10 @@ function registerUIModal(context: vscode.ExtensionContext) {
       message => {
         if (message.command === 'close') {
           panel.dispose();
+        } else if (message.command === 'generate') {
+          const { model, fields } = message.payload;
+
+          generateLaravelCrudFromUI(root, model, fields);
         }
       },
       undefined,

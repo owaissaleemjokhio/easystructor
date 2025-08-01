@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8" />
@@ -8,76 +8,27 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-        }
-
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 44px;
-            height: 24px;
-        }
-
-        .switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #ccc;
-            transition: 0.4s;
-            border-radius: 34px;
-        }
-
-        .slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: 0.4s;
-            border-radius: 50%;
-        }
-
-        input:checked+.slider {
-            background-color: #2563eb;
-        }
-
-        input:checked+.slider:before {
-            transform: translateX(20px);
-        }
-
-        pre {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-    </style>
+    <link href="modal.css" rel="stylesheet" />
 </head>
 
-<body class="bg-gray-950 text-white">
+<body class="text-white">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-black">🛠️ Easystructor Generator</h1>
-            <div class="flex items-center gap-2">
-                <span class="text-sm">Dark Mode</span>
+        <div class="flex items-center justify-between mb-5">
+            <div class="flex items-center gap-1">
+                <img src="https://raw.githubusercontent.com/owaissaleemjokhio/easystructor/master/assets/image.png"
+                    class="w-19 h-20 object-contain" alt="Easystructor Logo" />
+                <!-- <h1 class="text-2xl font-bold text-gray-900 text-black">Easystructor</h1> -->
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm font-medium text-gray-900 text-black">Dark Mode</span>
                 <label class="switch">
                     <input id="darkToggle" type="checkbox" />
                     <span class="slider"></span>
                 </label>
             </div>
         </div>
+
 
         <!-- Card Container -->
         <div class="bg-gray-900 shadow-xl rounded-xl p-6 space-y-6 border border-gray-800">
@@ -98,13 +49,13 @@
             </div>
 
             <!-- Template Buttons -->
-            <div class="flex gap-4">
+            <!-- <div class="flex gap-4">
                 <button onclick="saveTemplate()"
-                    class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-black font-semibold">Save
+                    class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-white">Save
                     Template</button>
                 <button onclick="loadTemplate()"
                     class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded text-white">Load Template</button>
-            </div>
+            </div> -->
 
             <!-- Laravel Code Preview -->
             <div>
@@ -120,8 +71,8 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/pluralize@8.0.0/pluralize.min.js"></script>
 
-    <!-- Script -->
     <script>
         const vscode = window.acquireVsCodeApi ? acquireVsCodeApi() : null;
         const fieldTypes = ['string', 'text', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'enum'];
@@ -162,7 +113,8 @@
         function updateCodePreview() {
             const model = document.getElementById('modelName').value.trim();
             const rows = document.querySelectorAll('.field-row');
-            let code = `Schema::create('${model.toLowerCase()}s', function (Blueprint $table) {\n  $table->id();\n`;
+            const plural = pluralize(model);
+            let code = `Schema::create('${plural.toLowerCase()}', function (Blueprint $table) {\n  $table->id();\n`;
 
             rows.forEach(row => {
                 const name = row.querySelector('.field-name').value.trim();
@@ -185,24 +137,103 @@
         }
 
         function submitData() {
-            const model = document.getElementById('modelName').value.trim();
+            const modelInput = document.getElementById('modelName');
+            const model = modelInput.value.trim();
+
+            document.querySelectorAll('.error-message').forEach(el => el.remove());
+            modelInput.classList.remove('border-red-500');
+
+            let hasError = false;
+
+            if (!model) {
+                modelInput.classList.add('border-red-500');
+                const error = document.createElement('div');
+                error.className = 'error-message text-red-500 text-sm mt-1';
+                error.textContent = 'Model name is required.';
+                modelInput.parentNode.appendChild(error);
+                hasError = true;
+            }
+
             const fields = [];
 
             document.querySelectorAll('.field-row').forEach(row => {
-                const name = row.querySelector('.field-name').value.trim();
-                const type = row.querySelector('.field-type').value;
+                const nameInput = row.querySelector('.field-name');
+                const typeSelect = row.querySelector('.field-type');
                 const nullable = row.querySelector('.field-nullable').checked;
                 const defaultVal = row.querySelector('.field-default').value.trim();
                 const enumInput = row.querySelector('.field-enum-values');
-                const enums = enumInput && !enumInput.classList.contains('hidden') ? enumInput.value.split(',').map(e => e.trim()) : null;
 
-                if (name) fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
+                const name = nameInput.value.trim();
+                const type = typeSelect.value;
+                const enums = enumInput && !enumInput.classList.contains('hidden')
+                    ? enumInput.value.split(',').map(e => e.trim())
+                    : null;
+
+                nameInput.classList.remove('border-red-500');
+                typeSelect.classList.remove('border-red-500');
+                row.querySelectorAll('.error-message').forEach(el => el.remove());
+
+                let rowHasError = false;
+
+                if (!name) {
+                    nameInput.classList.add('border-red-500');
+                    const error = document.createElement('div');
+                    error.className = 'error-message text-red-500 text-xs mt-1';
+                    error.textContent = 'Field name is required.';
+                    nameInput.parentNode.appendChild(error);
+                    rowHasError = true;
+                }
+
+                if (!type) {
+                    typeSelect.classList.add('border-red-500');
+                    const error = document.createElement('div');
+                    error.className = 'error-message text-red-500 text-xs mt-1';
+                    error.textContent = 'Field type is required.';
+                    typeSelect.parentNode.appendChild(error);
+                    rowHasError = true;
+                }
+
+                if (!rowHasError) {
+                    fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
+                } else {
+                    hasError = true;
+                }
             });
+
+            if (hasError) return;
 
             const payload = { model, fields };
             console.log('Submitting:', payload);
-            if (vscode) vscode.postMessage({ command: 'generate', payload });
+            if (vscode) {
+                vscode.postMessage({ command: 'generate', payload });
+                closeModal();
+            }
         }
+
+        // function submitData() {
+        //     const model = document.getElementById('modelName').value.trim();
+        //     const fields = [];
+
+        //     if (!model) {
+        //         alert('Please enter a model name.');
+        //         return;
+        //     }
+
+        //     document.querySelectorAll('.field-row').forEach(row => {
+        //         const name = row.querySelector('.field-name').value.trim();
+        //         const type = row.querySelector('.field-type').value;
+        //         const nullable = row.querySelector('.field-nullable').checked;
+        //         const defaultVal = row.querySelector('.field-default').value.trim();
+        //         const enumInput = row.querySelector('.field-enum-values');
+        //         const enums = enumInput && !enumInput.classList.contains('hidden') ? enumInput.value.split(',').map(e => e.trim()) : null;
+
+        //         if (name) fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
+        //     });
+
+        //     const payload = { model, fields };
+        //     console.log('Submitting:', payload);
+        //     if (vscode) vscode.postMessage({ command: 'generate', payload });
+        // }
 
         function saveTemplate() {
             const model = document.getElementById('modelName').value;

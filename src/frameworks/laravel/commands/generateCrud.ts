@@ -11,6 +11,103 @@ import { createMigrationFile } from '../stubs/migrationStub';
 import { writeRequestStub, generateValidationRules } from '../stubs/requestStub';
 import { writeModelStub } from '../stubs/modelStub';
 
+export function generateValidationRulesFromJson(fields: any[]) {
+    const ruleLines = fields.map(f => {
+        const rules = [];
+        if (f.type === 'string') rules.push('string');
+        if (f.type === 'boolean') rules.push('boolean');
+        if (f.type === 'enum' && f.enum) rules.push(`in:${f.enum.join(',')}`);
+        if (!f.nullable) rules.push('required');
+        return `'${f.name}' => '${rules.join('|')}'`;
+    }).join(',\n');
+    return `return [\n${ruleLines}\n];`;
+}
+
+export async function generateLaravelCrudFromUI(root: string, rawModel: string, fieldObjects: any[]) {
+    const moduleName = toStudly(rawModel);
+    const kebabCase = rawModel.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
+    const snakeCase = toSnake(moduleName);
+
+    const fields = fieldObjects.map(field => {
+        let parts = `${field.name}:${field.type}`;
+        if (field.nullable) parts += ':nullable';
+        if (field.default) parts += `:default(${field.default})`;
+        if (field.type === 'enum' && field.enum?.length) parts += `:allowed(${field.enum.join(',')})`;
+        return parts;
+    }).join(', ');
+
+    const terminal = vscode.window.createTerminal(`Laravel: ${moduleName}`);
+    terminal.show();
+    terminal.sendText(`cd ${root}`);
+    const sendArtisan = (cmd: string) => terminal.sendText(`php artisan ${cmd}`);
+
+    const failedSteps: string[] = [];
+
+    const steps = [
+        {
+            name: 'Request',
+            fn: () => writeRequestStub(root, moduleName, generateValidationRulesFromJson(fieldObjects))
+        },
+        {
+            name: 'Traits',
+            fn: () => {
+                writeStubFile(path.join(root, `app/Traits/JsonResponse.php`), jsonResponseStub());
+                writeStubFile(path.join(root, `app/Traits/Media.php`), mediaTraitStub());
+                writeStubFile(path.join(root, `app/Http/Resources/PaginatedCollection.php`), paginatedCollectionStub());
+            }
+        },
+        {
+            name: 'Service',
+            fn: () => writeStubFile(
+                path.join(root, `app/Services/${moduleName}Service.php`),
+                serviceStub(moduleName, fields)
+            )
+        },
+        {
+            name: 'Controller',
+            fn: () => writeStubFile(
+                path.join(root, `app/Http/Controllers/${moduleName}Controller.php`),
+                controllerStub(moduleName)
+            )
+        },
+        {
+            name: 'Migration',
+            fn: () => createMigrationFile(root, snakeCase, fields)
+        },
+        {
+            name: 'Model',
+            fn: () => writeModelStub(root, moduleName, fields)
+        },
+        {
+            name: 'Resource',
+            fn: () => sendArtisan(`make:resource ${moduleName}Resource`)
+        },
+        {
+            name: 'Routes',
+            fn: () => addApiRoute(root, kebabCase, moduleName)
+        }
+    ];
+
+    for (const step of steps) {
+        try {
+            step.fn();
+        } catch (err: any) {
+            failedSteps.push(`${step.name}: ${err.message}`);
+        }
+    }
+
+    if (failedSteps.length > 0) {
+        vscode.window.showErrorMessage(`Some steps failed:\n${failedSteps.join('\n')}`);
+    } else {
+        terminal.sendText(`composer dump-autoload`);
+        terminal.sendText(`php artisan optimize:clear`);
+
+        setTimeout(() => {
+            vscode.window.showInformationMessage(`CRUD for "${moduleName}" generated successfully.`);
+        }, 2000);
+    }
+}
+
 export async function generateCrud(workspaceRoot: string) {
     const rawInput = await vscode.window.showInputBox({ prompt: 'Enter Module Name (e.g., Product)' });
     if (!rawInput) return;
