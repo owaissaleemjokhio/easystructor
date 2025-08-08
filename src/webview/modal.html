@@ -9,10 +9,86 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <link href="modal.css" rel="stylesheet" />
+    <style>
+        #stubPreviewScreen {
+            transition: transform 0.3s ease-in-out;
+            transform: translateX(100%);
+        }
+
+        #stubPreviewScreen.show {
+            transform: translateX(0%);
+        }
+    </style>
 </head>
 
 <body class="text-white">
+    <!-- Open Button -->
+
+    <!-- Sidebar Stub Preview -->
+    <div id="stubPreviewScreen"
+        class="fixed top-0 right-0 h-full w-full md:w-[60%] bg-gray-900 z-50 shadow-lg flex flex-col">
+
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4 border-b border-gray-700">
+            <h2 class="text-xl font-semibold">Stub Preview</h2>
+            <button onclick="closeStubPreviewScreen()" class="text-red-400 hover:text-red-600 text-xl">✖</button>
+        </div>
+
+        <!-- Body -->
+        <div class="flex flex-1 overflow-hidden">
+            <!-- Sidebar Buttons -->
+            <div class="w-40 bg-gray-800 p-3 border-r border-gray-700">
+                <ul class="space-y-2">
+                    <li><button onclick="renderStub('model')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Model</button></li>
+                    <li><button onclick="renderStub('controller')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Controller</button></li>
+                    <li><button onclick="renderStub('migration')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Migration</button></li>
+                    <li><button onclick="renderStub('request')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">FormRequest</button></li>
+                    <li><button onclick="renderStub('service')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Service</button></li>
+                </ul>
+            </div>
+
+            <!-- Code Preview -->
+            <div class="flex-1 bg-black p-4 overflow-auto">
+                <pre id="previewOutput" class="text-green-400 text-sm whitespace-pre-wrap p-2"></pre>
+            </div>
+        </div>
+    </div>
+
+    <div id="stubPreviewScreen" class="hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">Stub Preview</h2>
+            <button onclick="closeStubPreviewScreen()" class="text-red-400 hover:text-red-600">✖ Close</button>
+        </div>
+
+        <div class="flex gap-4">
+            <div class="w-1/4">
+                <ul class="space-y-2">
+                    <li><button onclick="renderStub('model')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Model</button></li>
+                    <li><button onclick="renderStub('controller')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Controller</button></li>
+                    <li><button onclick="renderStub('migration')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Migration</button></li>
+                    <li><button onclick="renderStub('request')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">FormRequest</button></li>
+                    <li><button onclick="renderStub('service')"
+                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Service</button></li>
+                </ul>
+            </div>
+            <div class="w-3/4">
+                <pre id="previewOutput" class="bg-black text-green-400 p-4 rounded overflow-auto text-sm h-96"></pre>
+            </div>
+        </div>
+    </div>
+
     <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+
         <!-- Header -->
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-1">
@@ -66,13 +142,114 @@
 
             <!-- Final Actions -->
             <div class="flex justify-end gap-4 pt-4 border-t border-gray-700">
+                <button onclick="openStubPreviewScreen(); renderStub('model')"
+                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+                    Open Stub Preview
+                </button>
                 <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded" onclick="closeModal()">Cancel</button>
                 <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" onclick="submitData()">Generate</button>
             </div>
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/pluralize@8.0.0/pluralize.min.js"></script>
+    <script>
+        const stubTemplates = {
+            model: `<?php
+namespace App\\Models;
 
+use Illuminate\\Database\\Eloquent\\Model;
+
+class {{model}} extends Model
+{
+    protected $fillable = [{{fillable}}];
+}`,
+            controller: `<?php
+namespace App\\Http\\Controllers;
+
+class {{model}}Controller extends Controller
+{
+    public function index() {}
+}`,
+            migration: `Schema::create('{{table}}', function (Blueprint $table) {
+    $table->id();
+    {{fields}}
+    $table->timestamps();
+});`,
+            request: `class {{model}}Request extends FormRequest
+{
+    public function rules()
+    {
+        return [
+            {{rules}}
+        ];
+    }
+}`,
+            service: `class {{model}}Service
+{
+    public function create(array $data) {}
+}`
+        };
+
+        function showStubPreviewScreen() {
+            document.getElementById('stubPreviewScreen').classList.remove('hidden');
+            renderStub('model');
+        }
+
+        function closeStubPreviewScreen() {
+            document.getElementById('stubPreviewScreen').classList.add('hidden');
+        }
+
+        function renderStub(type) {
+            const model = document.getElementById('modelName').value.trim();
+            if (!model) return alert("Model name is required");
+
+            const fields = [];
+            const rules = [];
+            const fillable = [];
+
+            document.querySelectorAll('.field-row').forEach(row => {
+                const name = row.querySelector('.field-name').value.trim();
+                const type = row.querySelector('.field-type').value;
+                const nullable = row.querySelector('.field-nullable').checked;
+
+                if (!name) return;
+                fields.push(name);
+                fillable.push(`'${name}'`);
+                rules.push(`'${name}' => '${nullable ? 'nullable' : 'required'}'`);
+            });
+
+            let stub = stubTemplates[type];
+            stub = stub.replace(/{{model}}/g, model);
+            stub = stub.replace(/{{table}}/g, model.toLowerCase() + 's');
+            stub = stub.replace(/{{fillable}}/g, fillable.join(', '));
+            stub = stub.replace(/{{fields}}/g, fields.map(f => `$table->string('${f}');`).join('\n    '));
+            stub = stub.replace(/{{rules}}/g, rules.join(',\n            '));
+
+            document.getElementById('previewOutput').textContent = stub;
+        }
+    </script>
+
+    <script>
+        function openStubPreviewScreen() {
+            document.getElementById('stubPreviewScreen').classList.add('show');
+        }
+
+        function closeStubPreviewScreen() {
+            document.getElementById('stubPreviewScreen').classList.remove('show');
+        }
+
+        function renderStub(type) {
+            const stubExamples = {
+                model: `class User extends Model {\n  protected $fillable = ['name', 'email'];\n}`,
+                controller: `class UserController extends Controller {\n  public function index() {\n    return User::all();\n  }\n}`,
+                migration: `Schema::create('users', function (Blueprint $table) {\n  $table->id();\n  $table->string('name');\n  $table->timestamps();\n});`,
+                request: `class UserRequest extends FormRequest {\n  public function rules() {\n    return ['name' => 'required'];\n  }\n}`,
+                service: `class UserService {\n  public function create(array $data) {\n    return User::create($data);\n  }\n}`,
+            };
+
+            document.getElementById('previewOutput').textContent = stubExamples[type] || '// Stub not found';
+        }
+    </script>
     <script>
         const vscode = window.acquireVsCodeApi ? acquireVsCodeApi() : null;
         const fieldTypes = ['string', 'text', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'enum'];
@@ -133,7 +310,10 @@
             });
 
             code += '  $table->timestamps();\n});';
+
+
             document.getElementById('codePreview').innerText = code;
+
         }
 
         function submitData() {
