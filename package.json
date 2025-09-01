@@ -34,10 +34,6 @@
       {
         "command": "easystructor.generateModule",
         "title": "Easystructor: Generate Module"
-      },
-      {
-        "command": "easystructor.laravel.revertCrud",
-        "title": "Easystructor: Laravel - Revert CRUD"
       }
     ]
   },

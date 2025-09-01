@@ -10,6 +10,8 @@ import { toSnake, toStudly } from '../utils/stringUtils';
 import { createMigrationFile } from '../stubs/migrationStub';
 import { writeRequestStub, generateValidationRules } from '../stubs/requestStub';
 import { writeModelStub } from '../stubs/modelStub';
+import * as fs from "fs";
+import { exec } from "child_process";
 
 export function generateValidationRulesFromJson(fields: any[]) {
     const ruleLines = fields.map(f => {
@@ -101,10 +103,91 @@ export async function generateLaravelCrudFromUI(root: string, rawModel: string, 
     } else {
         terminal.sendText(`composer dump-autoload`);
         terminal.sendText(`php artisan optimize:clear`);
-
+        autoGit(moduleName)
         setTimeout(() => {
             vscode.window.showInformationMessage(`CRUD for "${moduleName}" generated successfully.`);
         }, 2000);
+    }
+}
+
+function runCommand(cmd: string, cwd: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+        exec(cmd, { cwd }, (error, stdout, stderr) => {
+            if (error) {
+                reject(stderr || error.message);
+            } else {
+                resolve(stdout.trim());
+            }
+        });
+    });
+}
+
+async function gitExists(): Promise<boolean> {
+    try {
+        await runCommand("git --version", process.cwd());
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function isRepo(workspacePath: string): boolean {
+    return fs.existsSync(path.join(workspacePath, ".git"));
+}
+
+async function initRepo(workspacePath: string) {
+    await runCommand("git init", workspacePath);
+    await runCommand("git add .", workspacePath);
+    await runCommand(`git commit -m "chore: initial commit"`, workspacePath);
+}
+
+export async function autoGit(moduleName: string) {
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders) {
+        vscode.window.showErrorMessage("No workspace folder found.");
+        return;
+    }
+
+    const workspacePath = workspaceFolders[0].uri.fsPath;
+
+    if (!(await gitExists())) {
+        vscode.window.showErrorMessage("Git not installed. Please install Git.");
+        return;
+    }
+
+    if (!isRepo(workspacePath)) {
+        vscode.window.showInformationMessage("No Git repo found. Initializing one...");
+        try {
+            await initRepo(workspacePath);
+        } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to initialize repo: ${err}`);
+            return;
+        }
+    }
+
+    const branch = `feature/${moduleName.toLowerCase()}`;
+
+    try {
+        // Try to checkout new branch, fallback to existing
+        await runCommand(`git checkout -b ${branch}`, workspacePath).catch(async () => {
+            await runCommand(`git checkout ${branch}`, workspacePath);
+        });
+
+        await runCommand("git add .", workspacePath);
+
+        // Commit (skip if nothing to commit)
+        await runCommand(`git commit -m "feat: Added ${moduleName} CRUD"`, workspacePath).catch(() => {
+            // ignore "nothing to commit"
+        });
+
+        // Push (safe with -u origin)
+        await runCommand(`git push -u origin ${branch}`, workspacePath).catch(() => {
+            vscode.window.showWarningMessage(`Branch "${branch}" created locally but push failed (no remote?).`);
+        });
+
+        vscode.window.showInformationMessage(`Git: CRUD for "${moduleName}" committed to branch "${branch}".`);
+    } catch (err: any) {
+        vscode.window.showErrorMessage(`Git error: ${err}`);
     }
 }
 
@@ -206,11 +289,6 @@ export async function generateCrud(workspaceRoot: string) {
             terminal.sendText(`composer dump-autoload`);
             terminal.sendText(`php artisan optimize:clear`);
 
-            setTimeout(() => {
-                vscode.window.showInformationMessage(`Full CRUD for "${moduleName}" generated successfully.`,
-                    { modal: true }
-                );
-            }, 3000);
         }
     } else {
         const terminal = vscode.window.createTerminal(`Laravel: ${moduleName}`);

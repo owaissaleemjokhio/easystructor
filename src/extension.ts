@@ -82,6 +82,9 @@ function registerUIModal(context: vscode.ExtensionContext, root: string) {
           const { model, fields } = message.payload;
 
           generateLaravelCrudFromUI(root, model, fields);
+        } else if (message.command === 'revertCrud') {
+          const { moduleName } = message.payload;
+          revertLaravelCrud(root, moduleName);
         }
       },
       undefined,

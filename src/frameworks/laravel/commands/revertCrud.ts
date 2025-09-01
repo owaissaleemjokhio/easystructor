@@ -3,15 +3,20 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { getCrudFilePaths, removeApiRoute } from '../utils/fileHelpers';
 
-export async function revertCrud(workspaceRoot: string) {
-    const moduleName = await vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
-    if (!moduleName) return;
+export async function revertCrud(workspaceRoot: string, moduleName?: string) {
+    // const moduleName = await vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
+    // if (!moduleName) return;
+
+    if (!moduleName) {
+        moduleName = await vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
+        if (!moduleName) return;
+    }
 
     const kebabCase = moduleName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-    const confirm = await vscode.window.showQuickPick(['Yes', 'No'], {
-        placeHolder: `Are you sure you want to delete all files related to ${moduleName}?`
-    });
-    if (confirm !== 'Yes') return;
+    // const confirm = await vscode.window.showQuickPick(['Yes', 'No'], {
+    //     placeHolder: `Are you sure you want to delete all files related to ${moduleName}?`
+    // });
+    // if (confirm !== 'Yes') return;
 
     const deleted: string[] = [];
 
