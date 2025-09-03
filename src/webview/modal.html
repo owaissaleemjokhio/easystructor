@@ -134,6 +134,26 @@
                 </div>
             </div>
 
+            <!-- Postman Export Section -->
+            <div class="mt-8 bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-700">
+                <h2 class="text-xl font-semibold text-white mb-4">Postman Collection</h2>
+                <p class="text-gray-400 text-sm mb-6">
+                    Export all generated modules as a single Postman Collection (CRUD endpoints).
+                </p>
+
+                <div class="flex gap-4">
+                    <button onclick="exportFullPostmanCollection()"
+                        class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-lg text-white font-medium shadow-md transition">
+                        Export Postman Collection
+                    </button>
+
+                    <button onclick="resetPostmanCollection()"
+                        class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white font-medium shadow-md transition">
+                        Reset Collection
+                    </button>
+                </div>
+            </div>
+
             <!-- Import / Export Section -->
             <div class="mt-8 bg-gray-900 rounded-xl shadow-lg p-6 border border-gray-700">
                 <h2 class="text-xl font-semibold text-white mb-4">Import / Export Board</h2>
@@ -323,6 +343,176 @@
     <script src="https://cdn.jsdelivr.net/npm/pluralize@8.0.0/pluralize.min.js"></script>
 
     <script>
+        // const vscode = require("vscode");
+        // function getProjectName() {
+        //     if (vscode.workspace.workspaceFolders?.length) {
+        //         return vscode.workspace.workspaceFolders[0].name;
+        //     }
+        //     return "Unnamed Project";
+        // }
+        // ========== POSTMAN COLLECTION HANDLING ==========
+
+        // Get or initialize Postman Collection
+        function getOrInitPostmanCollection() {
+            let stored = localStorage.getItem("postman_collection");
+            if (stored) {
+                return JSON.parse(stored);
+            }
+
+            const newCollection = {
+                info: {
+                    name: "Easystructor API",
+                    schema: "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+                },
+                item: [],
+                variable: [
+                    { key: "base_url", value: "http://localhost:8000/api" },
+                    { key: "auth_token", value: "your_token_here" }
+                ]
+            };
+
+            localStorage.setItem("postman_collection", JSON.stringify(newCollection));
+            return newCollection;
+        }
+
+        // Save updated collection
+        function savePostmanCollection(collection) {
+            localStorage.setItem("postman_collection", JSON.stringify(collection));
+        }
+
+        // Add new module CRUD endpoints into collection
+        function addModuleToPostmanCollection(moduleName, fields = []) {
+            const plural = pluralize(moduleName).toLowerCase();
+            const collection = getOrInitPostmanCollection();
+
+            // Avoid duplicates
+            if (collection.item.some(m => m.name === moduleName)) {
+                showToast(`${moduleName} already exists in Postman collection`);
+                return;
+            }
+
+            const moduleItem = {
+                name: moduleName,
+                item: [
+                    {
+                        name: `Get All ${plural}`,
+                        request: {
+                            method: "GET",
+                            url: {
+                                raw: "{{base_url}}/" + plural,
+                                host: ["{{base_url}}"],
+                                path: [plural]
+                            }
+                        }
+                    },
+                    {
+                        name: `Get Single ${moduleName}`,
+                        request: {
+                            method: "GET",
+                            url: {
+                                raw: "{{base_url}}/" + plural + "/:id",
+                                host: ["{{base_url}}"],
+                                path: [plural, ":id"]
+                            }
+                        }
+                    },
+                    {
+                        name: `Create ${moduleName}`,
+                        request: {
+                            method: "POST",
+                            header: [{ key: "Content-Type", value: "application/json" }],
+                            body: {
+                                mode: "raw",
+                                raw: JSON.stringify(
+                                    fields.reduce((acc, f) => {
+                                        acc[f.name] =
+                                            f.type === "integer"
+                                                ? 0
+                                                : f.type === "boolean"
+                                                    ? false
+                                                    : `${f.name}_sample`;
+                                        return acc;
+                                    }, {}),
+                                    null,
+                                    2
+                                )
+                            },
+                            url: {
+                                raw: "{{base_url}}/" + plural,
+                                host: ["{{base_url}}"],
+                                path: [plural]
+                            }
+                        }
+                    },
+                    {
+                        name: `Update ${moduleName}`,
+                        request: {
+                            method: "PUT",
+                            header: [{ key: "Content-Type", value: "application/json" }],
+                            body: {
+                                mode: "raw",
+                                raw: JSON.stringify(
+                                    fields.reduce((acc, f) => {
+                                        acc[f.name] =
+                                            f.type === "integer"
+                                                ? 1
+                                                : f.type === "boolean"
+                                                    ? true
+                                                    : `${f.name}_updated`;
+                                        return acc;
+                                    }, {}),
+                                    null,
+                                    2
+                                )
+                            },
+                            url: {
+                                raw: "{{base_url}}/" + plural + "/:id",
+                                host: ["{{base_url}}"],
+                                path: [plural, ":id"]
+                            }
+                        }
+                    },
+                    {
+                        name: `Delete ${moduleName}`,
+                        request: {
+                            method: "DELETE",
+                            url: {
+                                raw: "{{base_url}}/" + plural + "/:id",
+                                host: ["{{base_url}}"],
+                                path: [plural, ":id"]
+                            }
+                        }
+                    }
+                ]
+            };
+            collection.item.push(moduleItem);
+            savePostmanCollection(collection);
+
+            showToast(` ${moduleName} added to Postman collection`);
+        }
+
+        // Export full collection as JSON file
+        function exportFullPostmanCollection() {
+            const collection = getOrInitPostmanCollection();
+            const blob = new Blob([JSON.stringify(collection, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `easystructor_postman_collection.json`;
+            a.click();
+
+            URL.revokeObjectURL(url);
+        }
+
+        // Reset collection
+        function resetPostmanCollection() {
+            localStorage.removeItem("postman_collection");
+            showToast("Postman collection reset successfully.");
+        }
+
+    </script>
+    <script>
         function openConfirmModal() {
             document.getElementById("confirmModal").classList.remove("hidden");
         }
@@ -344,8 +534,7 @@
                 payload: { moduleName }
             });
         }
-    </script>
-    <script>
+
         function exportBoardData() {
             const boardName = document.getElementById("boardName")?.value || "myBoard";
             const modelName = document.getElementById("modelName")?.value || "myModel";
@@ -406,6 +595,9 @@
                             data.fields.forEach(field => addFieldRow(field));
                         }
                     }
+
+                    addModuleToPostmanCollection(data.model, data.fields);
+
 
                     columns = Array.isArray(data.columns) ? data.columns : [];
                     tasks = Array.isArray(data.tasks) ? data.tasks : [];
@@ -911,6 +1103,7 @@
             if (hasError) return;
 
             const payload = { model, fields };
+            addModuleToPostmanCollection(model, fields);
             console.log('Submitting:', payload);
             if (vscode) {
                 vscode.postMessage({ command: 'generate', payload });
