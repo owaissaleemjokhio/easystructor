@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.parseFields = void 0;
+exports.parseFields = parseFields;
 function splitFields(input) {
     const fields = [];
     let current = '';
@@ -115,7 +115,6 @@ function parseFields(input) {
         };
     });
 }
-exports.parseFields = parseFields;
 function buildMigrationLine(name, type, opts) {
     var _a;
     let line = `$table`;

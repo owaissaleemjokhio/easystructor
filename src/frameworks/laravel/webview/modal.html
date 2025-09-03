@@ -2,112 +2,83 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Easystructor Generator</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <link href="modal.css" rel="stylesheet" />
-    <style>
-        #stubPreviewScreen {
-            transition: transform 0.3s ease-in-out;
-            transform: translateX(100%);
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Easystructor Generator</title>
 
-        #stubPreviewScreen.show {
-            transform: translateX(0%);
-        }
-    </style>
+  <!-- Tailwind + Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+
+  <!-- SortableJS -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <link href="modal.css" rel="stylesheet" />
+
+
+  <style>
+    #stubPreviewScreen {
+      transition: transform 0.3s ease-in-out;
+      transform: translateX(100%);
+    }
+    #stubPreviewScreen.show {
+      transform: translateX(0%);
+    }
+  </style>
 </head>
 
 <body class="text-white">
-    <!-- Open Button -->
 
-    <!-- Sidebar Stub Preview -->
-    <div id="stubPreviewScreen"
-        class="fixed top-0 right-0 h-full w-full md:w-[60%] bg-gray-900 z-50 shadow-lg flex flex-col">
+  <!-- Stub Preview Sidebar -->
+  <div id="stubPreviewScreen" class="fixed top-0 right-0 h-full w-full md:w-[60%] bg-gray-900 z-50 shadow-lg flex flex-col">
 
-        <!-- Header -->
-        <div class="flex justify-between items-center p-4 border-b border-gray-700">
-            <h2 class="text-xl font-semibold">Stub Preview</h2>
-            <button onclick="closeStubPreviewScreen()" class="text-red-400 hover:text-red-600 text-xl">✖</button>
-        </div>
-
-        <!-- Body -->
-        <div class="flex flex-1 overflow-hidden">
-            <!-- Sidebar Buttons -->
-            <div class="w-40 bg-gray-800 p-3 border-r border-gray-700">
-                <ul class="space-y-2">
-                    <li><button onclick="renderStub('model')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Model</button></li>
-                    <li><button onclick="renderStub('controller')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Controller</button></li>
-                    <li><button onclick="renderStub('migration')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Migration</button></li>
-                    <li><button onclick="renderStub('request')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">FormRequest</button></li>
-                    <li><button onclick="renderStub('service')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded">Service</button></li>
-                </ul>
-            </div>
-
-            <!-- Code Preview -->
-            <div class="flex-1 bg-black p-4 overflow-auto">
-                <pre id="previewOutput" class="text-green-400 text-sm whitespace-pre-wrap p-2"></pre>
-            </div>
-        </div>
+    <!-- Header -->
+    <div class="flex justify-between items-center p-4 border-b border-gray-700">
+      <h2 class="text-xl font-semibold">Stub Preview</h2>
+      <button onclick="toggleStubPreview(false)" class="text-red-400 hover:text-red-600 text-xl">✖</button>
     </div>
 
-    <div id="stubPreviewScreen" class="hidden">
-        <div class="flex justify-between items-center mb-4">
-            <h2 class="text-xl font-semibold">Stub Preview</h2>
-            <button onclick="closeStubPreviewScreen()" class="text-red-400 hover:text-red-600">✖ Close</button>
-        </div>
+    <!-- Body -->
+    <div class="flex flex-1 overflow-hidden">
+      <!-- Sidebar Buttons -->
+      <div class="w-40 bg-gray-800 p-3 border-r border-gray-700">
+        <ul class="space-y-2">
+          <li><button onclick="renderStub('model')" class="stub-btn">Model</button></li>
+          <li><button onclick="renderStub('controller')" class="stub-btn">Controller</button></li>
+          <li><button onclick="renderStub('migration')" class="stub-btn">Migration</button></li>
+          <li><button onclick="renderStub('request')" class="stub-btn">FormRequest</button></li>
+          <li><button onclick="renderStub('service')" class="stub-btn">Service</button></li>
+        </ul>
+      </div>
 
-        <div class="flex gap-4">
-            <div class="w-1/4">
-                <ul class="space-y-2">
-                    <li><button onclick="renderStub('model')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Model</button></li>
-                    <li><button onclick="renderStub('controller')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Controller</button></li>
-                    <li><button onclick="renderStub('migration')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Migration</button></li>
-                    <li><button onclick="renderStub('request')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">FormRequest</button></li>
-                    <li><button onclick="renderStub('service')"
-                            class="w-full bg-gray-700 hover:bg-gray-600 p-2 rounded">Service</button></li>
-                </ul>
-            </div>
-            <div class="w-3/4">
-                <pre id="previewOutput" class="bg-black text-green-400 p-4 rounded overflow-auto text-sm h-96"></pre>
-            </div>
-        </div>
+      <!-- Code Preview -->
+      <div class="flex-1 bg-black p-4 overflow-auto">
+        <pre id="previewOutput" class="text-green-400 text-sm whitespace-pre-wrap p-2"></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-5">
+      <div class="flex items-center gap-1">
+        <img src="https://raw.githubusercontent.com/owaissaleemjokhio/easystructor/master/assets/image.png"
+          class="w-19 h-20 object-contain" alt="Easystructor Logo" />
+      </div>
+      <div class="flex items-center gap-4">
+        <span class="text-sm font-medium text-black">Dark Mode</span>
+        <label class="switch">
+          <input id="darkToggle" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
     </div>
 
-    <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <!-- Card Container -->
+    <div class="bg-gray-900 shadow-xl rounded-xl p-6 space-y-6 border border-gray-800">
 
-
-        <!-- Header -->
-        <div class="flex items-center justify-between mb-5">
-            <div class="flex items-center gap-1">
-                <img src="https://raw.githubusercontent.com/owaissaleemjokhio/easystructor/master/assets/image.png"
-                    class="w-19 h-20 object-contain" alt="Easystructor Logo" />
-                <!-- <h1 class="text-2xl font-bold text-gray-900 text-black">Easystructor</h1> -->
-            </div>
-            <div class="flex items-center gap-4">
-                <span class="text-sm font-medium text-gray-900 text-black">Dark Mode</span>
-                <label class="switch">
-                    <input id="darkToggle" type="checkbox" />
-                    <span class="slider"></span>
-                </label>
-            </div>
-        </div>
-
-        <!-- Card Container -->
-        <div class="bg-gray-900 shadow-xl rounded-xl p-6 space-y-6 border border-gray-800">
-            <div class="flex items-center gap-3 mt-4">
+        <div class="flex items-center gap-3 mt-4">
                 <input type="text" id="moduleName" placeholder="Enter Module Name"
                     class="flex-1 px-3 py-2 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 <button onclick="openConfirmModal()"
@@ -296,51 +267,41 @@
 
 
             </div>
+      <!-- Model Name -->
+      <div>
+        <label class="block text-sm font-semibold mb-2">Model Name</label>
+        <input id="modelName" class="w-full px-4 py-3 rounded-md bg-gray-800 border border-gray-700 text-white"
+          placeholder="e.g., Product" />
+      </div>
 
+      <!-- Fields -->
+      <div>
+        <label class="block text-sm font-semibold mb-2">Fields</label>
+        <div id="fieldsContainer" class="space-y-3"></div>
+        <button onclick="addFieldRow()" class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-sm rounded-md">
+          + Add Field
+        </button>
+      </div>
 
-            <!-- Model Name -->
-            <div>
-                <label class="block text-sm font-semibold mb-2">Model Name</label>
-                <input id="modelName" class="w-full px-4 py-3 rounded-md bg-gray-800 border border-gray-700 text-white"
-                    placeholder="e.g., Product" />
-            </div>
+      <!-- Laravel Code Preview -->
+      <div>
+        <label class="block text-sm font-semibold mb-2">Live Laravel Code</label>
+        <pre id="codePreview" class="text-green-400 bg-gray-800 p-4 rounded overflow-auto text-sm max-h-72"></pre>
+      </div>
 
-            <!-- Fields -->
-            <div>
-                <label class="block text-sm font-semibold mb-2">Fields</label>
-                <div id="fieldsContainer" class="space-y-3"></div>
-                <button onclick="addFieldRow()"
-                    class="mt-3 px-4 py-2 bg-green-600 hover:bg-green-700 text-sm rounded-md">+ Add Field</button>
-            </div>
-
-            <!-- Template Buttons -->
-            <!-- <div class="flex gap-4">
-                <button onclick="saveTemplate()"
-                    class="px-4 py-2 bg-yellow-500 hover:bg-yellow-600 rounded text-white">Save
-                    Template</button>
-                <button onclick="loadTemplate()"
-                    class="px-4 py-2 bg-indigo-500 hover:bg-indigo-600 rounded text-white">Load Template</button>
-            </div> -->
-
-            <!-- Laravel Code Preview -->
-            <div>
-                <label class="block text-sm font-semibold mb-2">Live Laravel Code</label>
-                <pre id="codePreview"
-                    class="text-green-400 bg-gray-800 p-4 rounded overflow-auto text-sm max-h-72"></pre>
-            </div>
-
-            <!-- Final Actions -->
-            <div class="flex justify-end gap-4 pt-4 border-t border-gray-700">
-                <button onclick="openStubPreviewScreen(); renderStub('model')"
-                    class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
-                    Open Stub Preview
-                </button>
-                <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded" onclick="closeModal()">Cancel</button>
-                <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" onclick="submitData()">Generate</button>
-            </div>
-        </div>
+      <!-- Actions -->
+      <div class="flex justify-end gap-4 pt-4 border-t border-gray-700">
+        <button onclick="toggleStubPreview(true); renderStub('model')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded">
+          Open Preview
+        </button>
+        <button class="bg-gray-600 hover:bg-gray-700 px-4 py-2 rounded" onclick="closeModal()">Cancel</button>
+        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded" onclick="submitData()">Generate</button>
+      </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/pluralize@8.0.0/pluralize.min.js"></script>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/pluralize@8.0.0/pluralize.min.js"></script>
 
     <script>
         // const vscode = require("vscode");
@@ -871,313 +832,504 @@
         renderBoard();
     </script>
 
-    <script>
-        const stubTemplates = {
-            model: `<?php
-            namespace App\\Models;
 
-            use Illuminate\\Database\\Eloquent\\Model;
+<script>
+    const vscode = window.acquireVsCodeApi ? acquireVsCodeApi() : null;
+    const fieldTypes = ['string', 'text', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'enum'];
 
-            class {{ model }} extends Model
-            {
-                protected $fillable = [{{ fillable }}];
+    // Converts "UserService" -> "userService"
+    function toCamel(str) {
+      return str.charAt(0).toLowerCase() + str.slice(1);
+    }
+
+    // Converts PascalCase or camelCase -> snake_case
+    // Example: "UserReferral" -> "user_referral"
+    function toSnake(str) {
+      return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+    }
+
+     // Build filters for service stub
+    function buildFilters(fields) {
+      const filters = fields
+        .map(f => {
+          if (['string', 'text'].includes(f.type)) {
+            return `->when(isset($filters['${f.name}']), fn($q) => $q->where('${f.name}', 'like', '%' . $filters['${f.name}'] . '%'))`;
+          }
+          if (['integer', 'bigint', 'boolean', 'float', 'decimal', 'enum', 'date', 'datetime', 'time'].includes(f.type)) {
+            return `->when(isset($filters['${f.name}']), fn($q) => $q->where('${f.name}', $filters['${f.name}']))`;
+          }
+          return '';
+        })
+        .filter(Boolean)
+        .join('\n        ');
+
+      // Ensure clean return (with or without filters)
+      return filters ? `\n        ${filters}` : '';
+    }
+    /* ---------------- STUB TEMPLATES ---------------- */
+    const stubTemplates = {
+model: `<?php
+namespace App\\Models;
+
+use Illuminate\\Database\\Eloquent\\Model;
+
+class {{model}} extends Model
+{
+    protected $fillable = [{{fillable}}];
 }`,
-            controller: `<?php
-            namespace App\\Http\\Controllers;
+      
+controller: `<?php
+namespace App\\Http\\Controllers;
 
-            class {{ model }}Controller extends Controller
-            {
-                public function index() { }
-}`,
-            migration: `Schema::create('{{ table }}', function (Blueprint $table) {
-                $table -> id();
-            {{ fields }}
-    $table->timestamps();
-});`,
-            request: `class {{ model }}Request extends FormRequest
-            {
-                public function rules()
-            {
-        return [
-            {{ rules }}
-            ];
+
+use App\\Http\\Requests\\{{model}}Request;
+use App\\Http\\Resources\\PaginatedCollection;
+use App\\Http\\Resources\\{{model}}Resource;
+use App\\Services\\{{model}}Service;
+use App\\Traits\\JsonResponse;
+
+
+class {{model}}Controller extends Controller
+{
+    use JsonResponse;
+
+    public function __construct(private {{model}}Service {{camelModelWithDollar}}Service) {}
+
+    /**
+     * Get All {{model}} list
+     *
+     * @return \\Illuminate\\Http\\JsonResponse|string
+     * 
+     */
+    public function index(): \\Illuminate\\Http\\JsonResponse|string
+    {
+        $records = $this->{{camelModel}}Service->all();
+
+       if (is_string(\$records)) {
+            return \$this->response([], 404, [\$records] );
+        }
+
+        return \$this->response(
+            new PaginatedCollection($records, '{{snakeModel}}', {{model}}Resource::class),
+            200,
+            [__('{{model}} list fetched successfully.')]
+        );
+    }
+
+     /**
+     * Save {{model}} Data
+     *
+     * @param {{model}}Request $request
+     * @return \\Illuminate\\Http\\JsonResponse|array
+     */
+    public function store({{model}}Request \$request): \\Illuminate\\Http\\JsonResponse
+    {
+      \$record = \$this->{{camelModel}}Service->store(\$request);
+      
+      if (is_string(\$record)) {
+          return \$this->response([], 404, [\$record] );
+      }
+
+      return \$this->response(
+          ["{{snakeModel}}" => new {{model}}Resource(\$record)],
+          201,
+          [__('{{model}} created successfully.')]
+      );
+    }
+
+    /**
+     * Display the specified {{model}}.
+     *
+     * @param integer \$id
+     * @return \\Illuminate\\Http\\JsonResponse
+     */
+    public function show(int \$id): \\Illuminate\\Http\\JsonResponse
+    {
+      \$record = \$this->{{camelModel}}Service->find(\$id);
+
+      if (is_string(\$record)) {
+          return \$this->response([], 404, [\$record]);
+      }
+
+      return \$this->response(
+          ["{{snakeModel}}" => new {{model}}Resource(\$record)],
+          200,
+          [__('{{model}} fetched successfully.')]
+      );
+    }
+
+    /**
+     * Update the specified {{model}}.
+     *
+     * @param {{model}}Request $request
+     * @param integer \$id
+     * @return \\Illuminate\\Http\\JsonResponse
+     */
+    public function update({{model}}Request \$request, int \$id): \\Illuminate\\Http\\JsonResponse
+    {
+      \$record = \$this->{{camelModel}}Service->update(\$id, \$request);
+
+      if (is_string(\$record)) {
+          return \$this->response([], 404, [\$record]);
+      }
+
+      return \$this->response(
+          ["{{snakeModel}}" => new {{model}}Resource(\$record)],
+          200,
+          [__('{{model}} updated successfully.')]
+      );
+    }
+
+    /**
+     * Delete the specified {{model}}.
+     *
+     * @param integer \$id
+     * @return \\Illuminate\\Http\\JsonResponse
+     */
+    public function destroy(int \$id): \\Illuminate\\Http\\JsonResponse
+    {
+      \$deleted = \$this->{{camelModel}}Service->delete(\$id);
+
+      if (is_string(\$deleted)) {
+          return \$this->response([], 404, [\$deleted]);
+      }
+
+      return \$this->response([], 200, [__('{{model}} deleted successfully.')]);
     }
 }`,
-            service: `class {{ model }}Service
-            {
-                public function create(array $data) { }
+
+
+migration: `Schema::create('{{table}}', function (Blueprint $table) {
+    $table->id();
+    {{fields}}
+    $table->timestamps();
+});`,
+
+request: `class {{model}}Request extends FormRequest
+{
+    public function rules()
+    {
+        return [
+            {{rules}}
+        ];
+    }
+}`,
+            
+service: `<?php
+
+namespace App\\Services;
+
+use App\\Http\\Requests\\{{model}}Request;
+use Illuminate\\Contracts\\Database\\Eloquent\\Builder;
+use App\\Models\\{{model}};
+use Illuminate\\Http\\Request;
+
+final class {{model}}Service
+{
+    /**
+     * {{model}}Service attributes
+     *
+     * @var array<int, string>
+     */
+    private array $attributes = [
+        {{fillable}}
+    ];
+
+    /**
+     * {{model}}Service Constructor
+     */
+    public function __construct(
+        public {{model}} $model,
+        public Request $request
+    ) {}
+
+    /**
+     * Get all {{model}}
+     *
+     * @return array|null
+     */
+    public function all()
+    {
+        $query = $this->model;
+        $filters = $this->request->all();
+
+        if (count($filters) > 0) {
+            $query = $this->applyFilters($query, $filters);
+        }
+
+        $records = $query->latest()->paginate($filters['per_page'] ?? 10);
+
+        if (!$records) {
+            return __('Records not found.');
+        }
+
+        return $records;
+    }
+
+    /**
+     * Apply Filters
+     *
+     * @param [type] $query
+     * @param [type] $filters
+     * @return Builder
+     */
+     protected function applyFilters($query, array $filters): Builder
+    {
+        return $query{{filters}};
+    }
+
+    /**
+     * Find a single {{model}}
+     *
+     * @param integer $id
+     * @return {{model}}|string
+     */
+    public function find(int $id): {{model}}|string
+    {
+        $record = $this->model->find($id);
+        if (!$record) {
+            return __('record not found.');
+        }
+        return $record;
+    }
+    
+    /**
+     * Store a new {{model}}
+     *
+     * @param {{model}}Request $request
+     * @return {{model}}|array
+     */
+    public function store({{model}}Request $request): {{model}}|array
+    {
+        $data = $request->only($this->attributes);
+        return $this->model->create($data);
+    }
+
+    /**
+     * Update an existing {{model}}
+     *
+     * @param integer $id
+     * @param {{model}}Request $request
+     * @return  {{model}}|string
+     */
+    public function update(int $id, {{model}}Request $request): {{model}}|string
+    {
+        $record = $this->model->find($id);
+
+         if (!$record) {
+            return __('Record not found.');
+        }
+
+        $data = $request->only($this->attributes);
+        $record->update($data);
+        return $record;
+    }
+
+    /**
+     * Delete a {{model}}
+     *
+     * @param integer $id
+     * @return {{model}}|string
+     */
+    public function delete(int $id):  {{model}}|string
+    {
+        $record = $this->model->find($id);
+          if (!$record) {
+            return __('Record not found.');
+        }
+
+        $record->delete();
+        return $record;
+    }
 }`
-        };
+    
 
-        function showStubPreviewScreen() {
-            document.getElementById('stubPreviewScreen').classList.remove('hidden');
-            renderStub('model');
+};
+
+    /* ---------------- UI HELPERS ---------------- */
+    function toggleStubPreview(show) {
+      document.getElementById('stubPreviewScreen').classList.toggle('show', show);
+    }
+
+    function closeModal() {
+      if (vscode) vscode.postMessage({ command: 'close' });
+    }
+
+    /* ---------------- STUB RENDERER ---------------- */
+    function renderStub(type) {
+      const model = document.getElementById('modelName').value.trim();
+      if (!model) return alert("Model name is required");
+
+      const fields = [];
+      const filtersFields = [];
+      const rules = [];
+      const fillable = [];
+
+      document.querySelectorAll('.field-row').forEach(row => {
+        const name = row.querySelector('.field-name').value.trim();
+        const type = row.querySelector('.field-type').value;
+        const nullable = row.querySelector('.field-nullable').checked;
+
+        if (!name) return;
+        fields.push(name);
+        filtersFields.push({name, type});
+        fillable.push(`'${name}'`);
+        rules.push(`'${name}' => '${nullable ? 'nullable' : 'required'}'`);
+      });
+
+      let stub = stubTemplates[type] || '// Stub not found';
+      stub = stub.replace(/{{model}}/g, model);
+      stub = stub.replace(/{{camelModel}}/g, toCamel(model));
+      stub = stub.replace(/{{snakeModel}}/g, toSnake(model));
+      stub = stub.replace(/{{camelModelWithDollar}}/g, "$"+toCamel(model));
+      stub = stub.replace(/{{table}}/g, pluralize(model).toLowerCase());
+      
+      stub = stub.replace(/{{fillable}}/g, fillable.join(', '));
+      stub = stub.replace(/{{fields}}/g, fields.map(f => `$table->string('${f}');`).join('\n    '));
+      stub = stub.replace(/{{rules}}/g, rules.join(',\n            '));
+      stub = stub.replace(/{{filters}}/g, buildFilters(filtersFields));
+
+      document.getElementById('previewOutput').textContent = stub;
+    }
+
+    /* ---------------- FIELDS ---------------- */
+    function addFieldRow(field = {}) {
+      const container = document.getElementById('fieldsContainer');
+      const div = document.createElement('div');
+      div.className = "field-row flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-md border border-gray-700";
+
+      div.innerHTML = `
+        <input placeholder="name" class="field-name px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-36" value="${field.name || ''}" />
+        <select class="field-type px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32">
+          ${fieldTypes.map(t => `<option value="${t}" ${t === field.type ? 'selected' : ''}>${t}</option>`).join('')}
+        </select>
+        <input placeholder="default" class="field-default px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32" value="${field.default || ''}" />
+        <input placeholder="enum1,enum2" class="field-enum-values px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-48 ${field.type === 'enum' ? '' : 'hidden'}" value="${field.enum?.join(',') || ''}" />
+        <label class="text-sm"><input type="checkbox" class="field-nullable mr-1" ${field.nullable ? 'checked' : ''} /> Nullable</label>
+        <button onclick="this.parentElement.remove(); updateCodePreview();" class="text-red-400 text-xl font-bold">×</button>
+      `;
+
+      const typeSelect = div.querySelector('.field-type');
+      const enumInput = div.querySelector('.field-enum-values');
+      typeSelect.addEventListener('change', () => {
+        enumInput.classList.toggle('hidden', typeSelect.value !== 'enum');
+        updateCodePreview();
+      });
+
+      div.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updateCodePreview));
+      container.appendChild(div);
+      updateCodePreview();
+    }
+
+    function updateCodePreview() {
+      const model = document.getElementById('modelName').value.trim();
+      const rows = document.querySelectorAll('.field-row');
+      const plural = pluralize(model || '');
+      let code = `Schema::create('${plural.toLowerCase()}', function (Blueprint $table) {\n  $table->id();\n`;
+
+      rows.forEach(row => {
+        const name = row.querySelector('.field-name').value.trim();
+        const type = row.querySelector('.field-type').value;
+        const nullable = row.querySelector('.field-nullable').checked;
+        const defaultVal = row.querySelector('.field-default').value;
+        const enumInput = row.querySelector('.field-enum-values');
+        const enums = (type === 'enum' && enumInput) ? enumInput.value.split(',').map(e => `'${e.trim()}'`).join(', ') : null;
+
+        if (!name) return;
+
+        code += `  $table->${type === 'enum' ? `enum('${name}', [${enums}])` : `${type}('${name}')`}`;
+        if (nullable) code += '->nullable()';
+        if (defaultVal) code += `->default('${defaultVal}')`;
+        code += ';\n';
+      });
+
+      code += '  $table->timestamps();\n});';
+      document.getElementById('codePreview').innerText = code;
+    }
+
+    /* ---------------- FORM SUBMIT ---------------- */
+    function submitData() {
+      const modelInput = document.getElementById('modelName');
+      const model = modelInput.value.trim();
+
+      document.querySelectorAll('.error-message').forEach(el => el.remove());
+      modelInput.classList.remove('border-red-500');
+
+      let hasError = false;
+      if (!model) {
+        modelInput.classList.add('border-red-500');
+        const error = document.createElement('div');
+        error.className = 'error-message text-red-500 text-sm mt-1';
+        error.textContent = 'Model name is required.';
+        modelInput.parentNode.appendChild(error);
+        hasError = true;
+      }
+
+      const fields = [];
+      document.querySelectorAll('.field-row').forEach(row => {
+        const name = row.querySelector('.field-name').value.trim();
+        const type = row.querySelector('.field-type').value;
+        const nullable = row.querySelector('.field-nullable').checked;
+        const defaultVal = row.querySelector('.field-default').value.trim();
+        const enumInput = row.querySelector('.field-enum-values');
+        const enums = enumInput && !enumInput.classList.contains('hidden')
+          ? enumInput.value.split(',').map(e => e.trim())
+          : null;
+
+        if (name) fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
+      });
+
+      if (hasError) return;
+        const payload = { model, fields };
+
+        addModuleToPostmanCollection(model, fields);
+        console.log('Submitting:', payload);
+        if (vscode) {
+            vscode.postMessage({ command: 'generate', payload });
+            // closeModal();
         }
 
-        function closeStubPreviewScreen() {
-            document.getElementById('stubPreviewScreen').classList.add('hidden');
-        }
-
-        function renderStub(type) {
-            const model = document.getElementById('modelName').value.trim();
-            if (!model) return alert("Model name is required");
-
-            const fields = [];
-            const rules = [];
-            const fillable = [];
-
-            document.querySelectorAll('.field-row').forEach(row => {
-                const name = row.querySelector('.field-name').value.trim();
-                const type = row.querySelector('.field-type').value;
-                const nullable = row.querySelector('.field-nullable').checked;
-
-                if (!name) return;
-                fields.push(name);
-                fillable.push(`'${name}'`);
-                rules.push(`'${name}' => '${nullable ? 'nullable' : 'required'}'`);
-            });
-
-            let stub = stubTemplates[type];
-            stub = stub.replace(/{{ model }}/g, model);
-            stub = stub.replace(/{{ table }}/g, model.toLowerCase() + 's');
-            stub = stub.replace(/{{ fillable }}/g, fillable.join(', '));
-            stub = stub.replace(/{{ fields }}/g, fields.map(f => `$table->string('${f}');`).join('\n    '));
-            stub = stub.replace(/{{ rules }}/g, rules.join(',\n            '));
-
-            document.getElementById('previewOutput').textContent = stub;
-        }
-    </script>
-
-    <script>
-        function openStubPreviewScreen() {
-            document.getElementById('stubPreviewScreen').classList.add('show');
-        }
-
-        function closeStubPreviewScreen() {
-            document.getElementById('stubPreviewScreen').classList.remove('show');
-        }
-
-        function renderStub(type) {
-            const stubExamples = {
-                model: `class User extends Model {\n  protected $fillable = ['name', 'email'];\n}`,
-                controller: `class UserController extends Controller {\n  public function index() {\n    return User::all();\n  }\n}`,
-                migration: `Schema::create('users', function (Blueprint $table) {\n  $table->id();\n  $table->string('name');\n  $table->timestamps();\n});`,
-                request: `class UserRequest extends FormRequest {\n  public function rules() {\n    return ['name' => 'required'];\n  }\n}`,
-                service: `class UserService {\n  public function create(array $data) {\n    return User::create($data);\n  }\n}`,
-            };
-
-            document.getElementById('previewOutput').textContent = stubExamples[type] || '// Stub not found';
-        }
-    </script>
-
-    <script>
-        const vscode = window.acquireVsCodeApi ? acquireVsCodeApi() : null;
-        const fieldTypes = ['string', 'text', 'integer', 'decimal', 'boolean', 'date', 'datetime', 'enum'];
-
-        function closeModal() {
-            if (vscode) vscode.postMessage({ command: 'close' });
-        }
-
-        function addFieldRow(field = {}) {
-            const container = document.getElementById('fieldsContainer');
-            const div = document.createElement('div');
-            div.className = "field-row flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-md border border-gray-700";
-
-            div.innerHTML = `
-            <input placeholder="name" class="field-name px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-36" value="${field.name || ''}" />
-            <select class="field-type px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32">
-                ${fieldTypes.map(t => `<option value="${t}" ${t === field.type ? 'selected' : ''}>${t}</option>`).join('')}
-            </select>
-            <input placeholder="default" class="field-default px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32" value="${field.default || ''}" />
-            <input placeholder="enum1,enum2" class="field-enum-values px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-48 ${field.type === 'enum' ? '' : 'hidden'}" value="${field.enum?.join(',') || ''}" />
-            <label class="text-sm"><input type="checkbox" class="field-nullable mr-1" ${field.nullable ? 'checked' : ''} /> Nullable</label>
-            <button onclick="this.parentElement.remove(); updateCodePreview();" class="text-red-400 text-xl font-bold">×</button>
-            `;
-
-            const typeSelect = div.querySelector('.field-type');
-            const enumInput = div.querySelector('.field-enum-values');
-            typeSelect.addEventListener('change', () => {
-                if (typeSelect.value === 'enum') enumInput.classList.remove('hidden');
-                else enumInput.classList.add('hidden');
-                updateCodePreview();
-            });
-
-            div.querySelectorAll('input, select').forEach(el => el.addEventListener('input', updateCodePreview));
-            container.appendChild(div);
-            updateCodePreview();
-        }
-
-        function updateCodePreview() {
-            const model = document.getElementById('modelName').value.trim();
-            const rows = document.querySelectorAll('.field-row');
-            const plural = pluralize(model);
-            let code = `Schema::create('${plural.toLowerCase()}', function (Blueprint $table) {\n  $table->id();\n`;
-
-            rows.forEach(row => {
-                const name = row.querySelector('.field-name').value.trim();
-                const type = row.querySelector('.field-type').value;
-                const nullable = row.querySelector('.field-nullable').checked;
-                const defaultVal = row.querySelector('.field-default').value;
-                const enumInput = row.querySelector('.field-enum-values');
-                const enums = (type === 'enum' && enumInput) ? enumInput.value.split(',').map(e => `'${e.trim()}'`).join(', ') : null;
-
-                if (!name) return;
-
-                code += `  $table->${type === 'enum' ? `enum('${name}', [${enums}])` : `${type}('${name}')`}`;
-                if (nullable) code += '->nullable()';
-                if (defaultVal) code += `->default('${defaultVal}')`;
-                code += ';\n';
-            });
-
-            code += '  $table->timestamps();\n});';
+        modelInput.value = '';
+        document.querySelectorAll('.field-row').forEach(row => row.remove()); // sab fields clear
+        addFieldRow();
 
 
-            document.getElementById('codePreview').innerText = code;
+    }
 
-        }
-
-        function submitData() {
-            const modelInput = document.getElementById('modelName');
-            const model = modelInput.value.trim();
-
-            document.querySelectorAll('.error-message').forEach(el => el.remove());
-            modelInput.classList.remove('border-red-500');
-
-            let hasError = false;
-
-            if (!model) {
-                modelInput.classList.add('border-red-500');
-                const error = document.createElement('div');
-                error.className = 'error-message text-red-500 text-sm mt-1';
-                error.textContent = 'Model name is required.';
-                modelInput.parentNode.appendChild(error);
-                hasError = true;
-            }
-
-            const fields = [];
-
-            document.querySelectorAll('.field-row').forEach(row => {
-                const nameInput = row.querySelector('.field-name');
-                const typeSelect = row.querySelector('.field-type');
-                const nullable = row.querySelector('.field-nullable').checked;
-                const defaultVal = row.querySelector('.field-default').value.trim();
-                const enumInput = row.querySelector('.field-enum-values');
-
-                const name = nameInput.value.trim();
-                const type = typeSelect.value;
-                const enums = enumInput && !enumInput.classList.contains('hidden')
-                    ? enumInput.value.split(',').map(e => e.trim())
-                    : null;
-
-                nameInput.classList.remove('border-red-500');
-                typeSelect.classList.remove('border-red-500');
-                row.querySelectorAll('.error-message').forEach(el => el.remove());
-
-                let rowHasError = false;
-
-                if (!name) {
-                    nameInput.classList.add('border-red-500');
-                    const error = document.createElement('div');
-                    error.className = 'error-message text-red-500 text-xs mt-1';
-                    error.textContent = 'Field name is required.';
-                    nameInput.parentNode.appendChild(error);
-                    rowHasError = true;
-                }
-
-                if (!type) {
-                    typeSelect.classList.add('border-red-500');
-                    const error = document.createElement('div');
-                    error.className = 'error-message text-red-500 text-xs mt-1';
-                    error.textContent = 'Field type is required.';
-                    typeSelect.parentNode.appendChild(error);
-                    rowHasError = true;
-                }
-
-                if (!rowHasError) {
-                    fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
-                } else {
-                    hasError = true;
-                }
-            });
-
-            if (hasError) return;
-
-            const payload = { model, fields };
-            addModuleToPostmanCollection(model, fields);
-            console.log('Submitting:', payload);
-            if (vscode) {
-                vscode.postMessage({ command: 'generate', payload });
-                // closeModal();
-            }
-
-            modelInput.value = '';
-            document.querySelectorAll('.field-row').forEach(row => row.remove()); // sab fields clear
-            addFieldRow();
-        }
-
-        // function submitData() {
-        //     const model = document.getElementById('modelName').value.trim();
-        //     const fields = [];
-
-        //     if (!model) {
-        //         alert('Please enter a model name.');
-        //         return;
-        //     }
-
-        //     document.querySelectorAll('.field-row').forEach(row => {
-        //         const name = row.querySelector('.field-name').value.trim();
-        //         const type = row.querySelector('.field-type').value;
-        //         const nullable = row.querySelector('.field-nullable').checked;
-        //         const defaultVal = row.querySelector('.field-default').value.trim();
-        //         const enumInput = row.querySelector('.field-enum-values');
-        //         const enums = enumInput && !enumInput.classList.contains('hidden') ? enumInput.value.split(',').map(e => e.trim()) : null;
-
-        //         if (name) fields.push({ name, type, nullable, default: defaultVal || null, enum: enums });
-        //     });
-
-        //     const payload = { model, fields };
-        //     console.log('Submitting:', payload);
-        //     if (vscode) vscode.postMessage({ command: 'generate', payload });
-        // }
-
-        function saveTemplate() {
-            const model = document.getElementById('modelName').value;
-            const fields = [];
-
-            document.querySelectorAll('.field-row').forEach(row => {
-                fields.push({
-                    name: row.querySelector('.field-name').value,
-                    type: row.querySelector('.field-type').value,
-                    nullable: row.querySelector('.field-nullable').checked,
-                    default: row.querySelector('.field-default').value,
-                    enum: row.querySelector('.field-enum-values').value.split(',').map(e => e.trim())
-                });
-            });
-
-            localStorage.setItem('easystructor_template', JSON.stringify({ model, fields }));
-            alert('Template saved!');
-        }
-
-        function loadTemplate() {
-            const raw = localStorage.getItem('easystructor_template');
-            if (!raw) return;
-            const { model, fields } = JSON.parse(raw);
-            document.getElementById('modelName').value = model;
-            document.getElementById('fieldsContainer').innerHTML = '';
-            fields.forEach(field => addFieldRow(field));
-        }
-
-        document.getElementById('darkToggle').addEventListener('change', e => {
-            document.documentElement.classList.toggle('dark', e.target.checked);
+    /* ---------------- TEMPLATES SAVE/LOAD ---------------- */
+    function saveTemplate() {
+      const model = document.getElementById('modelName').value;
+      const fields = [];
+      document.querySelectorAll('.field-row').forEach(row => {
+        fields.push({
+          name: row.querySelector('.field-name').value,
+          type: row.querySelector('.field-type').value,
+          nullable: row.querySelector('.field-nullable').checked,
+          default: row.querySelector('.field-default').value,
+          enum: row.querySelector('.field-enum-values').value.split(',').map(e => e.trim())
         });
+      });
+      localStorage.setItem('easystructor_template', JSON.stringify({ model, fields }));
+      alert('Template saved!');
+    }
 
-        new Sortable(fieldsContainer, {
-            animation: 150,
-            onEnd: updateCodePreview
-        });
+    function loadTemplate() {
+      const raw = localStorage.getItem('easystructor_template');
+      if (!raw) return;
+      const { model, fields } = JSON.parse(raw);
+      document.getElementById('modelName').value = model;
+      document.getElementById('fieldsContainer').innerHTML = '';
+      fields.forEach(field => addFieldRow(field));
+    }
 
-        window.onload = () => addFieldRow();
-    </script>
+    /* ---------------- INIT ---------------- */
+    document.getElementById('darkToggle').addEventListener('change', e => {
+      document.documentElement.classList.toggle('dark', e.target.checked);
+    });
+
+    new Sortable(fieldsContainer, { animation: 150, onEnd: updateCodePreview });
+
+    window.onload = () => addFieldRow();
+  </script>
 </body>
-
 </html>

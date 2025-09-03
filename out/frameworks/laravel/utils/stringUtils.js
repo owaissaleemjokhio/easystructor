@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.toStudly = exports.toKebab = exports.toSnake = exports.toCamel = void 0;
+exports.toCamel = toCamel;
+exports.toSnake = toSnake;
+exports.toKebab = toKebab;
+exports.toStudly = toStudly;
 /**
  * Converts a string to camelCase format.
  *
@@ -10,7 +13,6 @@ exports.toStudly = exports.toKebab = exports.toSnake = exports.toCamel = void 0;
 function toCamel(str) {
     return str.charAt(0).toLowerCase() + str.slice(1);
 }
-exports.toCamel = toCamel;
 /**
  * Converts a PascalCase or camelCase string to snake_case.
  *
@@ -21,7 +23,6 @@ exports.toCamel = toCamel;
 function toSnake(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
 }
-exports.toSnake = toSnake;
 /**
  * Converts a PascalCase or camelCase string to kebab-case.
  *
@@ -32,7 +33,6 @@ exports.toSnake = toSnake;
 function toKebab(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 }
-exports.toKebab = toKebab;
 /**
  * Converts a string to PascalCase (also called StudlyCase).
  *
@@ -46,5 +46,4 @@ function toStudly(str) {
         .replace(/(?:^|\s)\S/g, (a) => a.toUpperCase())
         .replace(/\s+/g, '');
 }
-exports.toStudly = toStudly;
 //# sourceMappingURL=stringUtils.js.map

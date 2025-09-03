@@ -9,22 +9,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.revertCrud = void 0;
+exports.revertCrud = revertCrud;
 const vscode = require("vscode");
 const path = require("path");
 const fs = require("fs");
 const fileHelpers_1 = require("../utils/fileHelpers");
-function revertCrud(workspaceRoot) {
+function revertCrud(workspaceRoot, moduleName) {
     return __awaiter(this, void 0, void 0, function* () {
-        const moduleName = yield vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
-        if (!moduleName)
-            return;
+        // const moduleName = await vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
+        // if (!moduleName) return;
+        if (!moduleName) {
+            moduleName = yield vscode.window.showInputBox({ prompt: 'Enter Module Name to revert (e.g., Product)' });
+            if (!moduleName)
+                return;
+        }
         const kebabCase = moduleName.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
-        const confirm = yield vscode.window.showQuickPick(['Yes', 'No'], {
-            placeHolder: `Are you sure you want to delete all files related to ${moduleName}?`
-        });
-        if (confirm !== 'Yes')
-            return;
+        // const confirm = await vscode.window.showQuickPick(['Yes', 'No'], {
+        //     placeHolder: `Are you sure you want to delete all files related to ${moduleName}?`
+        // });
+        // if (confirm !== 'Yes') return;
         const deleted = [];
         const filesToDelete = (0, fileHelpers_1.getCrudFilePaths)(moduleName, workspaceRoot);
         filesToDelete.forEach(relPath => {
@@ -42,5 +45,4 @@ function revertCrud(workspaceRoot) {
             : `Nothing found to delete for ${moduleName}`);
     });
 }
-exports.revertCrud = revertCrud;
 //# sourceMappingURL=revertCrud.js.map

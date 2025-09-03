@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeApiRoute = exports.addApiRoute = exports.getCrudFilePaths = exports.writeStubFile = void 0;
+exports.writeStubFile = writeStubFile;
+exports.getCrudFilePaths = getCrudFilePaths;
+exports.addApiRoute = addApiRoute;
+exports.removeApiRoute = removeApiRoute;
 const fs = require("fs");
 const path = require("path");
 const pluralize = require("pluralize");
@@ -25,7 +28,6 @@ function writeStubFile(filePath, content) {
         console.error(`[✘] Failed to write stub file: ${filePath}`, error);
     }
 }
-exports.writeStubFile = writeStubFile;
 function getCrudFilePaths(moduleName, workspaceRoot) {
     const snakeName = moduleName.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
     const snake = pluralize(snakeName);
@@ -46,7 +48,6 @@ function getCrudFilePaths(moduleName, workspaceRoot) {
     }
     return paths;
 }
-exports.getCrudFilePaths = getCrudFilePaths;
 function addApiRoute(root, routeName, controllerName) {
     const apiPath = path.join(root, 'routes/api.php');
     const line = `Route::apiResource('${routeName}', ${controllerName}Controller::class);\n`;
@@ -57,7 +58,6 @@ function addApiRoute(root, routeName, controllerName) {
         }
     }
 }
-exports.addApiRoute = addApiRoute;
 function removeApiRoute(root, routeName, controllerName) {
     const apiPath = path.join(root, 'routes/api.php');
     const line = `Route::apiResource('${routeName}', ${controllerName}Controller::class);\n`;
@@ -71,5 +71,4 @@ function removeApiRoute(root, routeName, controllerName) {
     }
     return false;
 }
-exports.removeApiRoute = removeApiRoute;
 //# sourceMappingURL=fileHelpers.js.map

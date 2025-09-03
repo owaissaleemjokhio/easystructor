@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeModelStub = void 0;
+exports.writeModelStub = writeModelStub;
 const fs = require("fs");
 const path = require("path");
 const fieldParser_1 = require("../utils/fieldParser");
@@ -29,5 +29,4 @@ class ${module} extends Model
 `;
     fs.writeFileSync(filePath, model);
 }
-exports.writeModelStub = writeModelStub;
 //# sourceMappingURL=modelStub.js.map

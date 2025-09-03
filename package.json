@@ -40,7 +40,7 @@
   "scripts": {
     "vscode:prepublish": "npm run compile && npm run compile-less",
     "compile": "tsc -p ./",
-    "compile-less": "lessc src/webview/modal.less src/webview/modal.css",
+    "compile-less": "lessc src/frameworks/laravel/webview/modal.less src/frameworks/laravel/webview/modal.css",
     "watch": "tsc -watch -p ./"
   },
   "devDependencies": {

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.controllerStub = void 0;
+exports.controllerStub = controllerStub;
 const stringUtils_1 = require("../utils/stringUtils");
 function controllerStub(name) {
     return `<?php
@@ -123,5 +123,4 @@ class ${name}Controller extends Controller
 
 }`;
 }
-exports.controllerStub = controllerStub;
 //# sourceMappingURL=controllerStub.js.map

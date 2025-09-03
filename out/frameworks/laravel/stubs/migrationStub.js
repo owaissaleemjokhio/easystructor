@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createMigrationFile = void 0;
+exports.createMigrationFile = createMigrationFile;
 const fs = require("fs");
 const path = require("path");
 const pluralize = require("pluralize");
@@ -36,5 +36,4 @@ return new class extends Migration {
 `;
     fs.writeFileSync(filePath, migration);
 }
-exports.createMigrationFile = createMigrationFile;
 //# sourceMappingURL=migrationStub.js.map

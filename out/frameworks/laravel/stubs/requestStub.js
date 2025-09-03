@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.writeRequestStub = exports.generateValidationRules = void 0;
+exports.generateValidationRules = generateValidationRules;
+exports.writeRequestStub = writeRequestStub;
 const fs = require("fs");
 const path = require("path");
 const fieldParser_1 = require("../utils/fieldParser");
@@ -13,7 +14,6 @@ function generateValidationRules(fieldStr) {
     });
     return `return [\n${ruleLines.join('\n')}\n];`;
 }
-exports.generateValidationRules = generateValidationRules;
 function writeRequestStub(root, module, rules) {
     const dir = path.join(root, 'app/Http/Requests');
     const filePath = path.join(dir, `${module}Request.php`);
@@ -40,5 +40,4 @@ class ${module}Request extends FormRequest
 `;
     fs.writeFileSync(filePath, content);
 }
-exports.writeRequestStub = writeRequestStub;
 //# sourceMappingURL=requestStub.js.map

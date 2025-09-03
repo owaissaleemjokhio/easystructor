@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.serviceStub = void 0;
+exports.serviceStub = serviceStub;
 const fieldParser_1 = require("../utils/fieldParser");
 function serviceStub(name, input) {
     const fields = (0, fieldParser_1.parseFields)(input);
@@ -147,5 +147,4 @@ final class ${name}Service
 }
 `;
 }
-exports.serviceStub = serviceStub;
 //# sourceMappingURL=serviceStub.js.map
