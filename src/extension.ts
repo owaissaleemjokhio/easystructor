@@ -65,12 +65,20 @@ function registerUIModal(context: vscode.ExtensionContext, root: string) {
     const htmlPath = path.join(context.extensionPath, 'src/frameworks/laravel', 'webview', 'modal.html');
     let htmlContent = fs.readFileSync(htmlPath, 'utf8');
 
+    // CSS
     const cssPath = vscode.Uri.file(
       path.join(context.extensionPath, 'src/frameworks/laravel', 'webview', 'modal.css')
     );
     const cssUri = panel.webview.asWebviewUri(cssPath);
 
     htmlContent = htmlContent.replace('modal.css', cssUri.toString());
+
+    // JS
+    const jsPath = vscode.Uri.file(
+      path.join(context.extensionPath, 'src/frameworks/laravel', 'webview', 'modal.js')
+    );
+    const jsUri = panel.webview.asWebviewUri(jsPath);
+    htmlContent = htmlContent.replace('modal.js', jsUri.toString());
 
     panel.webview.html = htmlContent;
 

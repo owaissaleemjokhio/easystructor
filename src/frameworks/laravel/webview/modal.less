@@ -10,6 +10,16 @@
 @font-family: 'Inter', sans-serif;
 @mono-font: 'Source Code Pro', monospace;
 
+#stubPreviewScreen {
+    transition: transform 0.3s ease-in-out;
+    transform: translateX(100%);
+
+    &.show {
+        transform: translateX(0%);
+    }
+}
+
+
 // Mixins
 .transition(@property: all, @duration: @animation-duration, @ease: ease-out) {
     transition: @property @duration @ease;
