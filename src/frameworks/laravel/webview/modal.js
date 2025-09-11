@@ -37,7 +37,7 @@ function addModuleToPostmanCollection(moduleName, fields = []) {
 
     // Avoid duplicates
     if (collection.item.some(m => m.name === moduleName)) {
-        showToast(`${moduleName} already exists in Postman collection`);
+        showToast(`${moduleName} already exists in Postman collection`, "warning");
         return;
     }
 
@@ -138,7 +138,7 @@ function addModuleToPostmanCollection(moduleName, fields = []) {
     collection.item.push(moduleItem);
     savePostmanCollection(collection);
 
-    showToast(` ${moduleName} added to Postman collection`);
+    showToast(` ${moduleName} added to Postman collection`, "success");
 }
 
 // Export full collection as JSON file
@@ -158,11 +158,16 @@ function exportFullPostmanCollection() {
 // Reset collection
 function resetPostmanCollection() {
     localStorage.removeItem("postman_collection");
-    showToast("Postman collection reset successfully.");
+    showToast("Postman collection reset successfully.", "success");
 }
 
 // ========== REVERT AND IMPORT AND EXPORT HANDLING ==========
 function openConfirmModal() {
+    const moduleName = document.getElementById("moduleName").value;
+    if (!moduleName) {
+        showToast("Please enter a module name!", "warning");
+        return;
+    }
     document.getElementById("confirmModal").classList.remove("hidden");
 }
 
@@ -177,7 +182,10 @@ function confirmRevertCrud() {
 
 function callRevertCrud() {
     const moduleName = document.getElementById("moduleName").value;
-
+    if (!moduleName) {
+        showToast("Please enter a module name!", "warning");
+        return;
+    }
     vscode.postMessage({
         command: "revertCrud",
         payload: { moduleName }
@@ -259,10 +267,9 @@ function importBoardData(event) {
                 renderBoard();
             }
 
-            showToast("Import successful!");
+            showToast("Import successful!", "success");
         } catch (err) {
-            console.error("Import Error:", err);
-            showToast("Invalid JSON file");
+            showToast("Invalid JSON file", "error");
         }
     };
     reader.readAsText(file);
@@ -287,13 +294,41 @@ function toggleEdit(id) {
     el.classList.toggle("hidden");
 }
 // Toast system
-function showToast(msg) {
+function showToast(msg, type = "error") {
+    const colors = {
+        success: "bg-green-600",
+        error: "bg-red-600",
+        warning: "bg-yellow-500 text-black",
+        info: "bg-blue-600"
+    };
+
+    // check if container already exists, else create
+    let container = document.getElementById("toast-container");
+    if (!container) {
+        container = document.createElement("div");
+        container.id = "toast-container";
+        container.className = "fixed bottom-4 right-4 space-y-2 z-50";
+        document.body.appendChild(container);
+    }
+
+    // remove previous toast (only keep one at a time)
+    container.innerHTML = "";
+
+    // create new toast
     const toast = document.createElement("div");
-    toast.className = "fixed bottom-4 right-4 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce";
+    toast.className = `${colors[type] || colors.error} text-white px-4 py-2 rounded-lg shadow-lg animate-bounce`;
     toast.innerText = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 3000);
+
+    container.appendChild(toast);
+
+    // auto remove after 3s
+    setTimeout(() => {
+        toast.remove();
+    }, 3000);
 }
+
+
+
 
 // Save & Load
 function saveColumns() {
@@ -320,29 +355,44 @@ function renderBoard() {
     board.innerHTML = "";
     columns.forEach(col => {
         const colDiv = document.createElement("div");
-        colDiv.className = `min-w-[300px] max-w-[300px] bg-gray-800 p-4 rounded-xl shadow-md border-t-4 ${col.border} flex flex-col`;
+        colDiv.className = `min-w-[300px] max-w-[300px] h-[500px] bg-gray-800 p-4 rounded-xl shadow-md border-t-4 ${col.border} flex flex-col`;
+
 
         colDiv.innerHTML = `
-                <div class="flex justify-between items-center mb-3">
-                    <h2 class="text-lg font-bold text-${col.color}-400">${col.title}</h2>
-                    <div class="flex gap-2">
-                        <button class="text-sm text-yellow-400" onclick="toggleEdit('${col.id}')">✏️</button>
-                        <button class="text-sm text-red-400" onclick="deleteColumn('${col.id}')">🗑️</button>
-                    </div>
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-bold text-${col.color}-400">${col.title}</h2>
+                <div class="flex gap-2">
+                    <button class="text-sm text-yellow-400" onclick="toggleEdit('${col.id}')">
+                        <i class="fas fa-pen"></i></button>
+                    <button class="text-sm text-red-400" onclick="deleteColumn('${col.id}')">
+                    <i class="fas fa-trash"></i></button>
                 </div>
-                <div id="edit-${col.id}" class="hidden mb-3">
-                    <input id="edit-input-${col.id}" class="w-full p-1 rounded bg-gray-700 text-white" value="${col.title}" />
-                    <button class="mt-1 text-xs text-green-400" onclick="editColumn('${col.id}')">Save</button>
+            </div>
+
+            <div id="edit-${col.id}" class="hidden mb-3">
+                <div class="flex items-center gap-2">
+                    <!-- Input -->
+                    <input id="edit-input-${col.id}" 
+                        class="flex-1 p-2 rounded-md bg-gray-800 border border-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-white text-sm outline-none transition" 
+                        value="${col.title}" />
+
+                    <!-- Small Save Button -->
+                    <button onclick="editColumn('${col.id}')"
+                            class="px-2 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded-md flex items-center gap-1 transition">
+                    <i class="fas fa-check text-xs"></i>
+                    Save
+                    </button>
                 </div>
-                `;
+            </div>
+            `;
 
         const list = document.createElement("div");
         list.id = col.id;
-        list.className = "task-list min-h-[220px] bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 p-3 text-gray-100";
+        list.className = "task-list w-64 md:w-72 lg:w-80 h-80 bg-gray-700 rounded-lg border-2 border-dashed border-gray-500 p-3 text-gray-100 overflow-y-auto";
         colDiv.appendChild(list);
 
         const addBtn = document.createElement("button");
-        addBtn.innerText = "+ Add Task";
+        addBtn.innerText = "Add Task";
         addBtn.className = `mt-3 px-4 py-2 w-full rounded-lg bg-${col.color}-500 text-white font-bold hover:bg-${col.color}-600 transition`;
         addBtn.onclick = () => openAddTaskModal(col.id);
         colDiv.appendChild(addBtn);
@@ -362,7 +412,9 @@ function renderTasks() {
             .filter(t => t.status === col.id)
             .forEach(t => {
                 const el = document.createElement("div");
-                el.className = "task bg-gray-900 border border-gray-600 p-3 mb-3 rounded-lg shadow-md cursor-move flex justify-between items-center";
+                el.className = "task bg-gray-800 border border-gray-700 p-3 mb-3 rounded-xl shadow hover:shadow-lg transition cursor-move";
+
+
                 el.draggable = true;
                 el.ondragstart = e => e.dataTransfer.setData("taskId", t.idx);
 
@@ -371,21 +423,21 @@ function renderTasks() {
                 title.className = "text-gray-100 font-medium break-all";
 
                 const actions = document.createElement("div");
-                actions.className = "flex gap-2 ml-3";
+                actions.className = "flex gap-2 mt-2 justify-end";
 
                 const editBtn = document.createElement("button");
-                editBtn.innerText = "✏️";
-                editBtn.className = "px-2 py-1 rounded bg-yellow-500 hover:bg-yellow-600 text-xs";
+                editBtn.innerHTML = `<i class="fas fa-pen"></i>`;
+                editBtn.className = "p-2 rounded-md bg-yellow-500 hover:bg-yellow-600 text-white text-xs transition";
                 editBtn.onclick = () => editTask(t.idx);
 
                 const delBtn = document.createElement("button");
-                delBtn.innerText = "🗑️";
-                delBtn.className = "px-2 py-1 rounded bg-red-600 hover:bg-red-700 text-xs";
+                delBtn.innerHTML = `<i class="fas fa-trash"></i>`;
+                delBtn.className = "p-2 rounded-md bg-red-600 hover:bg-red-700 text-white text-xs transition";
                 delBtn.onclick = () => deleteTask(t.idx);
 
                 const detailBtn = document.createElement("button");
-                detailBtn.innerText = "👁️";
-                detailBtn.className = "px-2 py-1 rounded bg-blue-600 hover:bg-blue-700 text-xs";
+                detailBtn.innerHTML = `<i class="fas fa-eye"></i>`;
+                detailBtn.className = "p-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-xs transition";
                 detailBtn.onclick = () => showDetail(t.idx);
 
                 actions.append(editBtn, delBtn, detailBtn);
@@ -438,7 +490,7 @@ function editColumn(id) {
 function deleteColumn(id) {
     const hasTasks = tasks.some(task => task.status === id); // FIX
     if (hasTasks) {
-        showToast("Cannot delete column with tasks.");
+        showToast("Cannot delete column with tasks.", 'info');
         return;
     }
     columns = columns.filter(c => c.id !== id);
@@ -843,7 +895,7 @@ function closeModal() {
 function renderStub(type) {
     const model = document.getElementById('modelName').value.trim();
     if (!model) {
-        return showToast("Model name is required");
+        return showToast("Model name is required", "error");
     }
 
     const fields = [];
@@ -885,14 +937,29 @@ function addFieldRow(field = {}) {
     div.className = "field-row flex flex-wrap gap-3 items-center bg-gray-800 p-4 rounded-md border border-gray-700";
 
     div.innerHTML = `
+        <span class="cursor-move text-gray-400 hover:text-gray-200">
+            <i class="fas fa-bars"></i>
+        </span>
+    
         <input placeholder="name" class="field-name px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-36" value="${field.name || ''}" />
+        
         <select class="field-type px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32">
           ${fieldTypes.map(t => `<option value="${t}" ${t === field.type ? 'selected' : ''}>${t}</option>`).join('')}
         </select>
+        
         <input placeholder="default" class="field-default px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-32" value="${field.default || ''}" />
+        
         <input placeholder="enum1,enum2" class="field-enum-values px-3 py-2 rounded bg-gray-900 border border-gray-700 text-white w-48 ${field.type === 'enum' ? '' : 'hidden'}" value="${field.enum?.join(',') || ''}" />
-        <label class="text-sm"><input type="checkbox" class="field-nullable mr-1" ${field.nullable ? 'checked' : ''} /> Nullable</label>
-        <button onclick="this.parentElement.remove(); updateCodePreview();" class="text-red-400 text-xl font-bold">×</button>
+
+        <label class="inline-flex items-center space-x-2 cursor-pointer text-sm text-gray-200">
+            <input type="checkbox" 
+                    class="field-nullable form-checkbox h-4 w-4 text-blue-500 border-gray-400 rounded focus:ring-0" 
+                    ${field.nullable ? 'checked' : ''} />
+            <span>Nullable</span>
+        </label>
+
+        <button onclick="this.parentElement.remove(); updateCodePreview();" class="text-red-400 text-xl font-bold"><i class="fas fa-times"></i>
+        </button>
       `;
 
     const typeSelect = div.querySelector('.field-type');
@@ -933,8 +1000,7 @@ function updateCodePreview() {
     document.getElementById('codePreview').innerText = code;
 }
 
-/* ---------------- FORM SUBMIT ---------------- */
-function submitData() {
+function payloadWithModelandField() {
     const modelInput = document.getElementById('modelName');
     const model = modelInput.value.trim();
 
@@ -967,20 +1033,62 @@ function submitData() {
 
     if (hasError) return;
     const payload = { model, fields };
+    return payload;
 
-    addModuleToPostmanCollection(model, fields);
+}
+/* ---------------- FORM SUBMIT ---------------- */
+function submitData() {
+
+    const payload = payloadWithModelandField();
+    addModuleToPostmanCollection(payload.model, payload.fields);
     console.log('Submitting:', payload);
     if (vscode) {
         vscode.postMessage({ command: 'generate', payload });
-        // closeModal();
     }
 
-    modelInput.value = '';
-    document.querySelectorAll('.field-row').forEach(row => row.remove()); // sab fields clear
-    addFieldRow();
-
-
 }
+
+function createLaravelProjectModal() {
+    document.getElementById("createLaravelProjectModal").classList.remove("hidden");
+}
+
+function closeLaravelProjectModal() {
+    document.getElementById("createLaravelProjectModal").classList.add("hidden");
+    const input = document.getElementById("newProjectName");
+    input.value = "";
+}
+
+function createLaravelProject() {
+    const input = document.getElementById("newProjectName");
+    const title = input.value.trim();
+    if (!title) {
+        showToast(`Project name is required.`, "error");
+    };
+    const payload = payloadWithModelandField();
+    payload.title = title;
+    closeLaravelProjectModal();
+    vscode.postMessage({ command: 'laravelCreate', payload });
+}
+
+// Listen for extension response
+window.addEventListener('message', event => {
+    const message = event.data;
+
+    if (message.command === 'generateResult') {
+        if (message.success) {
+            showToast(`CRUD for "${message.data?.moduleName}" generated successfully`, "success");
+            const modelInput = document.getElementById('modelName');
+            modelInput.value = '';
+            document.querySelectorAll('.field-row').forEach(row => row.remove()); // sab fields clear
+            addFieldRow();
+        } else {
+            if (message.error == "laravelSetUp") {
+                createLaravelProjectModal()
+                // showToast(`${message.error}`, "error");
+            }
+        }
+    }
+})
 
 /* ---------------- TEMPLATES SAVE/LOAD ---------------- */
 function saveTemplate() {
@@ -996,7 +1104,6 @@ function saveTemplate() {
         });
     });
     localStorage.setItem('easystructor_template', JSON.stringify({ model, fields }));
-    alert('Template saved!');
 }
 
 function loadTemplate() {

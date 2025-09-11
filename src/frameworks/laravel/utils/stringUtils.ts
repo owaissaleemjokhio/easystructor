@@ -20,6 +20,27 @@ export function toSnake(str: string): string {
 }
 
 /**
+ * Converts a string (PascalCase, camelCase, kebab-case, space separated)
+ * into snake_case.
+ *
+ * Examples:
+ *   toSnake("UserReferral")   => "user_referral"
+ *   toSnake("userReferral")   => "user_referral"
+ *   toSnake("User Referral")  => "user_referral"
+ *   toSnake("user referral")  => "user_referral"
+ *   toSnake("user-referral")  => "user_referral"
+ */
+export function toSnakeWithoutSpaces(str: string): string {
+    return str
+        .replace(/([a-z])([A-Z])/g, "$1_$2") // camelCase / PascalCase → underscore
+        .replace(/[\s\-]+/g, "_")            // spaces / dashes → underscore
+        .replace(/__+/g, "_")                // multiple underscores → single
+        .toLowerCase()
+        .trim();
+}
+
+
+/**
  * Converts a PascalCase or camelCase string to kebab-case.
  *
  * Example:

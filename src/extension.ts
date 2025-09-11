@@ -1,11 +1,69 @@
 import * as vscode from 'vscode';
-import { generateCrud as generateLaravelCrud, generateLaravelCrudFromUI } from './frameworks/laravel/commands/generateCrud';
+import { ensureLaravelProject, generateCrud as generateLaravelCrud, generateLaravelCrudFromUI, isLaravelProject } from './frameworks/laravel/commands/generateCrud';
 import { revertCrud as revertLaravelCrud } from './frameworks/laravel/commands/revertCrud';
 import * as fs from 'fs';
 import * as path from 'path';
 
+class EasystructorProvider implements vscode.TreeDataProvider<TreeItem> {
+  getTreeItem(element: TreeItem): vscode.TreeItem {
+    return element;
+  }
+
+  getChildren(): Thenable<TreeItem[]> {
+    return Promise.resolve([
+      new TreeItem("Generate Laravel Module", "easystructor.openModal"),
+      // new TreeItem("Settings", "easystructor.openSettings"),
+      // new TreeItem("About", "easystructor.openAbout"),
+
+    ]);
+  }
+}
+
+class TreeItem extends vscode.TreeItem {
+  constructor(label: string, commandId?: string) {
+    super(label, vscode.TreeItemCollapsibleState.None);
+
+    if (commandId) {
+      this.command = {
+        command: commandId,
+        title: label
+      };
+    }
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+
+  const treeDataProvider = new EasystructorProvider();
+  vscode.window.registerTreeDataProvider("easystructorView", treeDataProvider);
+
+  // Settings command
+  context.subscriptions.push(
+    vscode.commands.registerCommand("easystructor.openSettings", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "easystructorSettings",
+        "Easystructor Settings",
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+      );
+      panel.webview.html = getSettingsHtml();
+    })
+  );
+
+  // About command
+  context.subscriptions.push(
+    vscode.commands.registerCommand("easystructor.openAbout", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "easystructorAbout",
+        "About Easystructor",
+        vscode.ViewColumn.One,
+        { enableScripts: true }
+      );
+      panel.webview.html = getAboutHtml();
+    })
+  );
+
   if (!workspaceRoot) {
     vscode.window.showErrorMessage('Easystructor: No workspace folder found.');
     return;
@@ -33,6 +91,49 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(mainCmd);
+}
+
+function getGenerateModuleHtml(): string {
+  return `
+    <html>
+      <body style="font-family: sans-serif; padding: 20px;">
+        <h2>⚡ Generate Module</h2>
+        <p>Here you can configure your module generation.</p>
+      </body>
+    </html>
+  `;
+}
+
+function getSettingsHtml(): string {
+  return `
+    <html>
+      <body style="font-family: sans-serif; padding: 20px;">
+        <h2>⚙️ Easystructor Settings</h2>
+        <label>Default Project Path:</label><br/>
+        <input type="text" style="width: 100%; padding: 6px;" placeholder="e.g. D:/laragon/www" /><br/><br/>
+        <label>Theme:</label><br/>
+        <select style="padding: 6px;">
+          <option>Light</option>
+          <option>Dark</option>
+        </select><br/><br/>
+        <button onclick="alert('Settings saved!')" style="padding: 8px 14px; background: #007acc; color: white; border: none; border-radius: 4px;">Save</button>
+      </body>
+    </html>
+  `;
+}
+
+function getAboutHtml(): string {
+  return `
+    <html>
+      <body style="font-family: sans-serif; padding: 20px;">
+        <h2>📖 About Easystructor</h2>
+        <p><b>Version:</b> 1.0.0</p>
+        <p>Easystructor is a Laravel CRUD generator built as a VS Code Extension.</p>
+        <p>Author: <b>Muhammad Owais</b></p>
+        <p>GitHub: <a href="https://github.com/" target="_blank">Click Here</a></p>
+      </body>
+    </html>
+  `;
 }
 
 function registerLaravelCommands(context: vscode.ExtensionContext, root: string) {
@@ -89,7 +190,36 @@ function registerUIModal(context: vscode.ExtensionContext, root: string) {
         } else if (message.command === 'generate') {
           const { model, fields } = message.payload;
 
-          generateLaravelCrudFromUI(root, model, fields);
+          const ok = isLaravelProject(root);
+          if (!ok) {
+            panel.webview.postMessage({ command: 'generateResult', success: false, error: 'laravelSetUp' });
+            return;
+          } else {
+            generateLaravelCrudFromUI(root, model, fields);
+
+            panel.webview.postMessage({
+              command: 'generateResult',
+              success: true,
+              data: { moduleName: message.payload.model }
+            });
+          }
+
+        } else if (message.command === 'laravelCreate') {
+          const { title, model, fields } = message.payload;
+          const isCompleted = ensureLaravelProject(root, title, model, fields);
+          if (!isCompleted) {
+            panel.webview.postMessage({
+              command: 'generateResult',
+              success: false,
+              error: 'Something went wrong.'
+            });
+          }
+          panel.webview.postMessage({
+            command: 'generateResult',
+            success: true,
+            data: { moduleName: message.payload.model }
+          });
+
         } else if (message.command === 'revertCrud') {
           const { moduleName } = message.payload;
           revertLaravelCrud(root, moduleName);
