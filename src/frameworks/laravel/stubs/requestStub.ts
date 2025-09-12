@@ -23,6 +23,10 @@ export function writeRequestStub(root: string, module: string, rules: string) {
         fs.mkdirSync(dir, { recursive: true });
     }
 
+    if (fs.existsSync(filePath)) {
+        return;
+    }
+
     // const ruleLines = Object.entries(rules).map(([key, val]) => `'${key}' => '${val}',`);
 
     const content = `<?php

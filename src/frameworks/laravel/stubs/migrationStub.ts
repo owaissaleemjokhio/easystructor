@@ -41,6 +41,8 @@ return new class extends Migration {
     }
 };
 `;
-
+    if (fs.existsSync(filePath)) {
+        return;
+    }
     fs.writeFileSync(filePath, migration);
 }
