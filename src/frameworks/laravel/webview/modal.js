@@ -237,7 +237,6 @@ function importBoardData(event) {
         try {
             const data = JSON.parse(e.target.result);
 
-            // board aur model set karo
             const boardInput = document.getElementById("boardName");
             if (boardInput) boardInput.value = data.board || "";
 
@@ -256,11 +255,32 @@ function importBoardData(event) {
             addModuleToPostmanCollection(data.model, data.fields);
 
 
-            columns = Array.isArray(data.columns) ? data.columns : [];
-            tasks = Array.isArray(data.tasks) ? data.tasks : [];
+            // columns = Array.isArray(data.columns) ? data.columns : [];
+            // tasks = Array.isArray(data.tasks) ? data.tasks : [];
 
-            localStorage.setItem("columns", JSON.stringify(columns));
-            localStorage.setItem("tasks", JSON.stringify(tasks));
+            // localStorage.setItem("columns", JSON.stringify(columns));
+            // localStorage.setItem("tasks", JSON.stringify(tasks));
+
+            const savedCols = JSON.parse(localStorage.getItem("columns") || "[]");
+            const savedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
+
+            if (Array.isArray(data.columns)) {
+                data.columns.forEach(col => {
+                    const exists = savedCols.find(c => c.id === col.id);
+                    if (!exists) savedCols.push(col);
+                });
+                columns = savedCols;
+                localStorage.setItem("columns", JSON.stringify(columns));
+            }
+
+            if (Array.isArray(data.tasks)) {
+                data.tasks.forEach(task => {
+                    const exists = savedTasks.find(t => t.id === task.id);
+                    if (!exists) savedTasks.push(task);
+                });
+                tasks = savedTasks;
+                localStorage.setItem("tasks", JSON.stringify(tasks));
+            }
 
             // board redraw
             if (typeof renderBoard === "function") {
@@ -327,13 +347,11 @@ function showToast(msg, type = "error") {
     }, 3000);
 }
 
-
-
-
 // Save & Load
 function saveColumns() {
     localStorage.setItem("columns", JSON.stringify(columns));
 }
+
 function loadColumns() {
     const saved = localStorage.getItem("columns");
     if (saved) {
@@ -355,11 +373,12 @@ function renderBoard() {
     board.innerHTML = "";
     columns.forEach(col => {
         const colDiv = document.createElement("div");
-        colDiv.className = `min-w-[300px] max-w-[300px] h-[500px] bg-gray-800 p-4 rounded-xl shadow-md border-t-4 ${col.border} flex flex-col`;
+        colDiv.className = `columns min-w-[300px] max-w-[300px] h-[500px] bg-gray-800 p-4 rounded-xl shadow-md border-t-4 ${col.border} flex flex-col`;
 
+        colDiv.setAttribute("data-id", col.id); // column unique ID
 
         colDiv.innerHTML = `
-            <div class="flex justify-between items-center mb-3">
+            <div class="flex justify-between items-center mb-3  cursor-move handleColumns">
                 <h2 class="text-lg font-bold text-${col.color}-400">${col.title}</h2>
                 <div class="flex gap-2">
                     <button class="text-sm text-yellow-400" onclick="toggleEdit('${col.id}')">
@@ -398,6 +417,23 @@ function renderBoard() {
         colDiv.appendChild(addBtn);
 
         board.appendChild(colDiv);
+    });
+
+    new Sortable(board, {
+        animation: 150,
+        handle: ".handleColumns", // drag handle
+        ghostClass: "opacity-50",
+        onEnd: function () {
+            // update column order
+            const newOrder = [];
+            board.querySelectorAll(".columns").forEach(colEl => {
+                const id = colEl.getAttribute("data-id");
+                const found = columns.find(c => c.id === id);
+                if (found) newOrder.push(found);
+            });
+            columns = newOrder;
+            saveColumns();
+        }
     });
     renderTasks();
 }
