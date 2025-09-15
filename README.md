@@ -1,55 +1,78 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/Easystructor.easystructor?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=Easystructor.easystructor)
 
 
-<h1 align="center">Easystructor — Full-Stack Code Generator</h1>
+<h1 align="center">Easystructor - The Ultimate Developer Toolkit for VS Code</h1>
 
 <div align="center">
     <img src="./assets/image.png">
 </div>
 
+**Easystructor** is a powerful **VS Code Extension** that provides a complete, end-to-end toolkit for Laravel developers.  
+It streamlines the entire workflow with **automated code generation, database schema design, real-time previews, API testing, Git workflow automation, and integrated task management** — all within a modern **Webview interface**.  
 
-**Easystructor** is a Visual Studio Code extension that automates the generation of clean, scalable boilerplate code for modern backend frameworks. Currently focused on Laravel (Service/Repository/DDD structure), support for NestJS, Django, and Spring is coming soon.
+Unlike traditional generators, **Easystructor** goes beyond scaffolding by unifying the entire development lifecycle — from **idea to implementation, API integration, version control, and project management** — directly inside VS Code, making it a true productivity companion for modern teams.  
+
+> 💡 From idea → Code → API → Git → Project Management — everything inside VS Code.
+
+---
+## ✨ Core Productivity Features
+
+- 📋 **Kanban Board**  
+  A built-in **project management board** inside VS Code:  
+  - Add, edit, delete tasks & columns  
+  - Drag-and-drop tasks between columns  
+  - Export/Import JSON for backups or sharing  
+
+- 🔀 **Auto Git Workflow**  
+  Easystructor handles versioning for you:  
+  - Creates a new branch (`feature/module-name`)  
+  - Runs `git add .`  
+  - Commits (`feat: Added ModuleName CRUD`)  
+  - Pushes to remote automatically 
+
+- 📦 **Postman Exporter**  
+  Generate a **ready-to-use Postman Collection** with all your CRUD endpoints in one click.  
+
+- ⚡ **Real-time Stub Preview**  
+  Instantly preview Models, Controllers, Services, Requests, and Resources before they are written to your Laravel project.  
+
+- 🛠️ **Migration Builder**  
+  Add fields via an interactive form and see a **live migration code preview** for faster schema design.  
+
+- 🗑️ **Safe Revert Actions**  
+  Roll back entire CRUD modules safely without leaving leftover files or half-deleted code.  
+
+- 📂 **Config Import/Export**  
+  Save your extension setup (board state, CRUD settings, preferences) as JSON and reload anytime.  
+
+- 🧩 **Multiple Modals**  
+  Smooth and modern dialogs for CRUD, tasks, confirmations, and detail previews.  
+
+- 🌗 **Dark Mode Support**  
+  Toggle between dark and light themes seamlessly.  
 
 ---
 
-## ✨ Features
+## ✅ Laravel Integration Features
 
-### ✅ Laravel Support (Advanced)
-- 🔧 Generate full CRUD modules:
-  - 🧩 Model (with `$fillable`, `$attributes`)
-  - 🛡️ Form Request (with accurate validation)
-  - ⚙️ Controller (uses Service pattern)
-  - 📦 Service class (with filters, pagination, find/store/update/delete)
-  - 🎯 Resource class
-- ⚙️ Auto-register `Route::apiResource(...)`
-- 🧹 Auto-revert/delete a complete module
-- 🔁 Centralized JSON Response and Exception-friendly structure
-- 🧠 Intelligent field parser:
-  - Supports syntax like:  
-    `name:string, is_active:boolean:nullable:default(true), type:enum:allowed(admin,user):default(user)`
-  - Handles nullable, default, enum, and type-specific validation/migration
-- 🔍 Service filters based on field types (text vs exact match)
-- 📦 Artisan-based dynamic stub generation and cleanup
-- 📦 Clean modular folder structure
-- 🧪 Field Types Supported:
-  - `string`, `text`, `integer`, `bigint`, `float`, `decimal`
-  - `boolean`, `enum`, `date`, `datetime`, `time`, `json`
+- 🔧 **Complete CRUD Modules**:  
+  - 🧩 **Model** (with `$fillable`, `$attributes`, casting & relationships)  
+  - 🛡️ **Form Request** (accurate validation rules)  
+  - ⚙️ **Controller** (Service + Resource pattern)  
+  - 📦 **Service Class** (filters, pagination, CRUD methods)  
+  - 🎯 **Resource Class** (standardized JSON responses)  
+- ⚙️ Auto-registers routes via `Route::apiResource(...)`  
+- 🔁 Centralized **JSON Response & Exception Handling**  
+- 🔍 Smart service filters (text-based `LIKE` vs exact match)  
+- 🧪 Supported field types:  
+  `string`, `text`, `integer`, `bigint`, `float`, `decimal`,  
+  `boolean`, `enum`, `date`, `datetime`, `time`, `json`  
 
 ---
 
-## 📦 Example Input
+## 🧾 Output Examples
 
-```text
-name:string,
-email:string:nullable,
-price:decimal:default(0.00),
-is_active:boolean:default(true),
-role:enum:allowed(admin,user):default(user),
-registered_at:datetime:nullable
-```
-
-### 🧾 Output: Migration
-
+### Migration
 ```php
 $table->string('name');
 $table->string('email')->nullable();
@@ -78,6 +101,19 @@ $table->dateTime('registered_at')->nullable();
 ->when(isset($filters['is_active']), fn($q) => $q->where('is_active', $filters['is_active']))
 ```
 
+## 📁 Output Structure
+
+```
+app/
+├── Models/Product.php
+├── Http/
+│   ├── Controllers/ProductController.php
+│   ├── Requests/ProductRequest.php
+│   ├── Resources/ProductResource.php
+├── Services/ProductService.php
+routes/
+└── api.php (auto-updated)
+```
 ---
 
 ## 🚀 Getting Started
@@ -94,55 +130,51 @@ code --install-extension Easystructor.easystructor
 
 ## 💻 Usage
 
-### 🛠️ Generate CRUD Module
-
-1. Open a Laravel project in VS Code.
-2. Open the Command Palette:  
-   `Ctrl + Shift + P` / `Cmd + Shift + P`
-3. Run:  
-   `Easystructor: Generate CRUD Module`
-4. Enter module name (e.g. `Product`)
-5. Enter fields in this format:  
-   `name:string, price:decimal:default(0.00), status:boolean:default(true)`
+1. Open the **Easystructor Sidebar** inside VS Code.  
+2. Organize and track progress using the built-in **Kanban Board**. 
+3. Use the **Migration Builder** to design your database schema with a live preview.  
+4. Instantly **preview code stubs** before finalizing.  
+5. Generate a **Laravel module** (Models, Controllers, Services, Requests, Resources) in one click.  
+6. Commit your changes with **Auto Git Workflow** (branch → add → commit → push).  
+7. Export all endpoints as a **Postman Collection** for quick API testing.  
 
 ---
 
-### 🔁 Revert a Module
+## 📸 Workflow in Action
 
-To delete the full CRUD module (Model, Controller, etc.):  
-Run: `Easystructor: Revert CRUD Module`
-
+Export endpoints to **Postman**  
+![Postman Export](./assets/screenshots/postman.png)
 ---
+Easily **Revert a Module**  
+![Kanban Board](./assets/screenshots/revertModule.png)
+<!-- ---
+Design database with **Migration Builder**  
+![Migration Builder](./assets/screenshots/migration.png)
+---
+Preview code with **Stub Preview**  
+![Stub Preview](./assets/screenshots/stub-preview.png) -->
 
-## 📁 Output Structure
-
-```
-app/
-├── Models/Product.php
-├── Http/
-│   ├── Controllers/ProductController.php
-│   ├── Requests/ProductRequest.php
-│   ├── Resources/ProductResource.php
-├── Services/ProductService.php
-routes/
-└── api.php (auto-updated)
-```
 
 ---
 
 ## 🛣️ Roadmap
 
-- [x] Laravel CRUD generator
-- [x] Intelligent field parser (with enum/default/nullable)
-- [x] Full modular architecture
-- [x] Auto-revert CRUD
-- [x] Auto-filter generation
-- [x] Command palette support
-- [x] JSON response handling
-- [ ] NestJS & Django support (in progress)
-- [ ] UI-based form input for fields
-- [ ] In-editor preview before generation
-- [ ] Artisan command customization via config
+- [x] Kanban Board (task management with drag & drop, import/export)  
+- [x] Auto Git Workflow (branch → add → commit → push)  
+- [x] Postman Collection Exporter  
+- [x] Real-time Stub Preview (Model, Controller, Service, Request)  
+- [x] Laravel CRUD Generator  
+- [x] Migration Builder with live preview  
+- [x] Config Import/Export (CRUD configs, board settings, preferences)  
+- [x] Safe Revert CRUD modules  
+- [x] Centralized JSON Response handling  
+- [x] Dark/Light mode support  
+- [ ] Relationships generator (belongsTo, hasMany, etc.) 
+- [ ] Custom validation rules 
+- [ ] Seeder & Factory stubs
+- [ ] AI-assisted module suggestions
+- [ ] Swagger/OpenAPI generator for API docs  
+- [ ] Advanced GitOps (auto PRs, semantic release hooks)  
 
 ---
 
