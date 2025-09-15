@@ -1,7 +1,7 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/owaissaleemjokhio/easystructor/blob/master/LICENSE.md) [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/Easystructor.easystructor?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=Easystructor.easystructor)
 
 
-<h1 align="center">Easystructor - The Ultimate Developer Toolkit for VS Code</h1>
+<h2 align="center">Easystructor - The Ultimate Developer Toolkit for VS Code</h2>
 
 <div align="center">
     <img src="./assets/image.png">
@@ -142,19 +142,17 @@ code --install-extension Easystructor.easystructor
 
 ## 📸 Workflow in Action
 
+Manage tasks with **Kanban Board**  
+![Kanban Board](./assets/screenshots/kanbanBoard.png)
+---
 Export endpoints to **Postman**  
 ![Postman Export](./assets/screenshots/postman.png)
 ---
 Easily **Revert a Module**  
 ![Kanban Board](./assets/screenshots/revertModule.png)
-<!-- ---
-Design database with **Migration Builder**  
-![Migration Builder](./assets/screenshots/migration.png)
 ---
-Preview code with **Stub Preview**  
-![Stub Preview](./assets/screenshots/stub-preview.png) -->
-
-
+Design database with **Migration Builder**  
+![Stub Preview](./assets/screenshots/preview.png)
 ---
 
 ## 🛣️ Roadmap
