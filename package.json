@@ -1,7 +1,7 @@
 {
   "name": "easystructor",
   "displayName": "EasyStructor",
-  "description": "Generate clean modular code structures (CRUD, services, resources) for Laravel, NestJS, and more.",
+  "description": "Easystructor is a powerful VS Code Extension that provides a complete, end-to-end toolkit for Laravel developers.",
   "version": "1.0.1",
   "publisher": "easystructor",
   "engines": {

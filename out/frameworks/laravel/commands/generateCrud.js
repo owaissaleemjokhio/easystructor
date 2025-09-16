@@ -10,6 +10,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateValidationRulesFromJson = generateValidationRulesFromJson;
+exports.isComposerInstalled = isComposerInstalled;
+exports.isLaravelProject = isLaravelProject;
+exports.ensureLaravelProject = ensureLaravelProject;
 exports.generateLaravelCrudFromUI = generateLaravelCrudFromUI;
 exports.autoGit = autoGit;
 exports.generateCrud = generateCrud;
@@ -42,6 +45,93 @@ function generateValidationRulesFromJson(fields) {
     }).join(',\n');
     return `return [\n${ruleLines}\n];`;
 }
+/**
+ * Check if Composer is installed globally
+ */
+function isComposerInstalled() {
+    try {
+        (0, child_process_1.execSync)("composer --version", { stdio: "ignore" });
+        return true;
+    }
+    catch (_a) {
+        return false;
+    }
+}
+/**
+ * Check if given folder is a Laravel project
+ */
+function isLaravelProject(root) {
+    const artisanPath = path.join(root, "artisan");
+    const composerPath = path.join(root, "composer.json");
+    if (!fs.existsSync(artisanPath) || !fs.existsSync(composerPath)) {
+        return false;
+    }
+    try {
+        const composerJson = JSON.parse(fs.readFileSync(composerPath, "utf8"));
+        const deps = Object.assign(Object.assign({}, (composerJson.dependencies || {})), (composerJson.require || {}));
+        return deps["laravel/framework"] !== undefined;
+    }
+    catch (_a) {
+        return false;
+    }
+}
+function waitForLaravelProject(root, projectName, timeout = 220000) {
+    const projectRoot = path.join(root, projectName);
+    return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const check = () => {
+            const artisanPath = path.join(projectRoot, 'artisan');
+            if (fs.existsSync(artisanPath)) {
+                resolve(projectRoot); // Laravel project ready
+            }
+            else if (Date.now() - start > timeout) {
+                reject(new Error("Timeout: Laravel project not detected."));
+            }
+            else {
+                setTimeout(check, 2000); // 2s baad dobara check karo
+            }
+        };
+        check();
+    });
+}
+/**
+ * Create a new Laravel project if not exists
+ */
+function ensureLaravelProject(root, projectName, rawModel, fieldObjects) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!isComposerInstalled()) {
+            vscode.window.showErrorMessage("Composer is not installed on your system. Please install Composer first.");
+            return false;
+        }
+        if (!projectName) {
+            vscode.window.showErrorMessage("Project name is required to create a new Laravel project.");
+            return false;
+        }
+        const projectNameWithSnake = (0, stringUtils_1.toSnakeWithoutSpaces)(projectName);
+        const terminal = vscode.window.createTerminal("Laravel Setup");
+        terminal.show();
+        terminal.sendText(`cd "${root}"`);
+        terminal.sendText(`composer create-project laravel/laravel "${projectNameWithSnake}"`);
+        terminal.sendText(`cd "${root}\\${projectNameWithSnake}"`);
+        try {
+            const projectRoot = yield waitForLaravelProject(root, projectNameWithSnake);
+            vscode.window.showInformationMessage(`Laravel project "${projectNameWithSnake}" is ready!`);
+            const delayMs = 1.5 * 60 * 1000;
+            // const delayOpenMs = 2.3 * 60 * 1000;
+            // setTimeout(() => {
+            //     vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.file(projectRoot), false);
+            // }, delayOpenMs);
+            setTimeout(() => {
+                terminal.sendText(`cd "${root}\\${projectNameWithSnake}"`);
+                const projectRoot = path.join(root, projectNameWithSnake);
+                generateLaravelCrudFromUI(projectRoot, rawModel, fieldObjects);
+            }, delayMs);
+        }
+        catch (err) {
+            vscode.window.showErrorMessage(err.message);
+        }
+    });
+}
 function generateLaravelCrudFromUI(root, rawModel, fieldObjects) {
     return __awaiter(this, void 0, void 0, function* () {
         const moduleName = (0, stringUtils_1.toStudly)(rawModel);
@@ -58,7 +148,7 @@ function generateLaravelCrudFromUI(root, rawModel, fieldObjects) {
                 parts += `:allowed(${field.enum.join(',')})`;
             return parts;
         }).join(', ');
-        const terminal = vscode.window.createTerminal(`Laravel: ${moduleName}`);
+        const terminal = vscode.window.createTerminal(`Easystructor: ${moduleName}`);
         terminal.show();
         terminal.sendText(`cd ${root}`);
         const sendArtisan = (cmd) => terminal.sendText(`php artisan ${cmd}`);

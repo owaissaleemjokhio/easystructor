@@ -20,12 +20,15 @@ function writeStubFile(filePath, content) {
         if (!fs.existsSync(dir)) {
             fs.mkdirSync(dir, { recursive: true });
         }
+        if (fs.existsSync(filePath)) {
+            return;
+        }
         // Write content to the file
         fs.writeFileSync(filePath, content, 'utf8');
-        console.log(`[✔] Stub written: ${filePath}`);
+        console.log(`Stub written: ${filePath}`);
     }
     catch (error) {
-        console.error(`[✘] Failed to write stub file: ${filePath}`, error);
+        console.error(`Failed to write stub file: ${filePath}`, error);
     }
 }
 function getCrudFilePaths(moduleName, workspaceRoot) {

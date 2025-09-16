@@ -27,6 +27,9 @@ class ${module} extends Model
     ];
 }
 `;
+    if (fs.existsSync(filePath)) {
+        return;
+    }
     fs.writeFileSync(filePath, model);
 }
 //# sourceMappingURL=modelStub.js.map

@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.toCamel = toCamel;
 exports.toSnake = toSnake;
+exports.toSnakeWithoutSpaces = toSnakeWithoutSpaces;
 exports.toKebab = toKebab;
 exports.toStudly = toStudly;
 /**
@@ -22,6 +23,25 @@ function toCamel(str) {
  */
 function toSnake(str) {
     return str.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase();
+}
+/**
+ * Converts a string (PascalCase, camelCase, kebab-case, space separated)
+ * into snake_case.
+ *
+ * Examples:
+ *   toSnake("UserReferral")   => "user_referral"
+ *   toSnake("userReferral")   => "user_referral"
+ *   toSnake("User Referral")  => "user_referral"
+ *   toSnake("user referral")  => "user_referral"
+ *   toSnake("user-referral")  => "user_referral"
+ */
+function toSnakeWithoutSpaces(str) {
+    return str
+        .replace(/([a-z])([A-Z])/g, "$1_$2") // camelCase / PascalCase → underscore
+        .replace(/[\s\-]+/g, "_") // spaces / dashes → underscore
+        .replace(/__+/g, "_") // multiple underscores → single
+        .toLowerCase()
+        .trim();
 }
 /**
  * Converts a PascalCase or camelCase string to kebab-case.
