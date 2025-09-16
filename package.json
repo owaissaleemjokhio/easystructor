@@ -2,7 +2,7 @@
   "name": "easystructor",
   "displayName": "EasyStructor",
   "description": "Easystructor is a powerful VS Code Extension that provides a complete, end-to-end toolkit for Laravel developers.",
-  "version": "1.0.2",
+  "version": "1.1.2",
   "publisher": "easystructor",
   "engines": {
     "vscode": "^1.102.0"
@@ -13,14 +13,18 @@
     "url": "https://github.com/owaissaleemjokhio/easystructor"
   },
   "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "keywords": [
+    "Scaffold",
+    "Boilerplate",
+    "Generator",
+    "Project Management",
     "Laravel",
     "PHP",
-    "JavaScript",
-    "TypeScript",
-    "Other",
-    "Snippets",
-    "Code Generators",
-    "Frameworks"
+    "CRUD"
   ],
   "activationEvents": [
     "onCommand:easystructor.openModal",
